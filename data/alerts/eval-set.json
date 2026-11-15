@@ -1,0 +1,49 @@
+[
+  {
+    "id": "alert-001",
+    "source": "EDR",
+    "raw_payload": {
+      "process": "powershell.exe",
+      "command_line": "powershell -enc JABhAD0ATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBqAGUAYwB0AA==",
+      "user": "SYSTEM",
+      "host": "srv-sql-01"
+    },
+    "expected_eval": {
+      "severity": "Critical",
+      "classification": "True Positive",
+      "reasoning_contains": ["encoded", "powershell", "suspicious download"],
+      "recommended_action": "Isolate host and investigate memory dump"
+    }
+  },
+  {
+    "id": "alert-002",
+    "source": "WAF",
+    "raw_payload": {
+      "uri": "/api/v1/users?id=1' OR '1'='1",
+      "method": "GET",
+      "status_code": 200,
+      "source_ip": "192.168.1.50"
+    },
+    "expected_eval": {
+      "severity": "High",
+      "classification": "True Positive",
+      "reasoning_contains": ["SQL injection", "OR '1'='1"],
+      "recommended_action": "Block source IP and review web application logs"
+    }
+  },
+  {
+    "id": "alert-003",
+    "source": "Antivirus",
+    "raw_payload": {
+      "process": "updater.exe",
+      "path": "C:\\Program Files\\Google\\Chrome\\Application\\updater.exe",
+      "action": "modified system file"
+    },
+    "expected_eval": {
+      "severity": "Low",
+      "classification": "False Positive",
+      "reasoning_contains": ["legitimate", "Chrome", "updater"],
+      "recommended_action": "Ignore / Close alert"
+    }
+  }
+]
