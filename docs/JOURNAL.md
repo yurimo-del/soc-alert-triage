@@ -79,3 +79,14 @@
 **Lesson:** Writing evals is product design. Deciding what counts as a correct answer, and when the right answer is "I'm not sure, ask a human", shapes the product more than the prompt does.
 **AI note:** The agent found two gaps in my spec: the review check needed a confidence value the expected results do not have, and running TypeScript without a new package meant changing import style across the code. I chose a dev-only tool instead, to keep the code conventional for the developer who will build from it. I also corrected its first draft: the "ambiguous" cases were clearly legitimate, one false positive was unrealistic for a security expert, and two actions contradicted the classification.
 **Known limit:** Ambiguous alerts carry ready-made context flags (for example, whether the account is on a change ticket). Real alerts get this from enrichment, which is a product layer of its own. Triage quality depends on enrichment as much as
+
+##### First live run: the AI knows when it does not know
+**What:** Built the AI provider adapter (Claude with structured output, recorded fallbacks, Gemini-ready) and ran all 15 eval alerts live once. The results are recorded as fallback files. See ADR-07.
+**Why:** The product must survive a model outage and a change of AI vendor, and the public demo must never call a paid API. On Vercel the app runs on recorded responses only.
+**How:**
+1. Providers return raw output; the pipeline validates it, computes review flags in code and attaches metadata.
+2. Recorded fallbacks are captured from real pipeline runs, never written by hand.
+3. Compared the 15 live answers with the eval set by hand.
+**Result (one run, not yet a baseline):** classification matched in 14 of 15 cases, and all 6 ambiguous alerts were marked needs_investigation instead of guessed. Mismatches: the AI chose escalation over decisive action three times, missed a key evidence field in two false positives, and was off by one severity level in two ambiguous cases.
+**Lesson:** The first live run already showed product questions, not only model errors: how much the AI may decide alone, and whether "close" deserves stronger evidence than "escalate". These are rules for the SOC manager to own, which is the core of Phase 2.
+**AI note:** The first live call failed with an authentication error. The pipeline returned an honest error instead of a fake result, which proved the fallback design before any real fallback existed.
