@@ -57,3 +57,14 @@
 2. Replaced the metrics with criteria the eval set can actually measure.
 3. Recorded the decision as ADR-02.
 **Lesson:** In an AI product, honest success criteria come from evals, not from estimates. A number appears only after the first measured run.
+
+##### Schemas as the contract between model and product
+**What:** Defined the Alert and TriageResult schemas in zod, with two triage shapes: what the model may produce, and the full stored result. Human review flags are computed in code from explicit rules. See ADR-03.
+**Why:** A prototype trusts whatever the model returns. A product needs a checked contract, and the model must not decide when a human looks. Letting the model set its own review flag would make human oversight depend on the model's own confidence.
+**How:**
+1. One schema per shape, with TypeScript types inferred from it.
+2. A model-output schema that drops unknown keys, so a harmless extra field does not trigger a fallback and distort evals.
+3. A strict stored-result schema for saved results and recorded fallback files.
+4. A pure `computeReview()` with its rules in a readable list a SOC manager can audit.
+**Lesson:** Moving from prototype to product means moving decisions out of the prompt and into code that can be read, tested and audited. Strictness belongs where we control the data, tolerance where the model does.
+**AI note:** The agent found a gap in my spec: the model should not return review fields at all, so it proposed a separate model-output schema. I corrected its default to make every schema strict, because a strict model schema would turn small model quirks into fallbacks and make evals measure the fallback instead of the model.
