@@ -68,3 +68,14 @@
 4. A pure `computeReview()` with its rules in a readable list a SOC manager can audit.
 **Lesson:** Moving from prototype to product means moving decisions out of the prompt and into code that can be read, tested and audited. Strictness belongs where we control the data, tolerance where the model does.
 **AI note:** The agent found a gap in my spec: the model should not return review fields at all, so it proposed a separate model-output schema. I corrected its default to make every schema strict, because a strict model schema would turn small model quirks into fallbacks and make evals measure the fallback instead of the model.
+
+##### An eval set that defines what "correct" means
+**What:** Rebuilt the eval set as 15 synthetic alerts with expected results: 5 clear threats, 4 clear false positives and 6 genuinely ambiguous cases, covering all six alert sources. A validation script checks every case against the schemas and the review rules.
+**Why:** Without a ground truth, "the AI triages well" is a claim, not evidence. The old set compared free text and tested a download the alert data did not contain, so it measured wording instead of judgment.
+**How:**
+1. Graded on schema fields (severity, classification, action type, human review) and on which alert fields the evidence must cite, not on exact wording.
+2. Every ambiguous case holds one benign and one suspicious signal, and the evidence must cite both.
+3. `npm run validate:evals` checks the schema, that expected review flags match `computeReview()`, and that only documentation IPs and example.com domains are used.
+**Lesson:** Writing evals is product design. Deciding what counts as a correct answer, and when the right answer is "I'm not sure, ask a human", shapes the product more than the prompt does.
+**AI note:** The agent found two gaps in my spec: the review check needed a confidence value the expected results do not have, and running TypeScript without a new package meant changing import style across the code. I chose a dev-only tool instead, to keep the code conventional for the developer who will build from it. I also corrected its first draft: the "ambiguous" cases were clearly legitimate, one false positive was unrealistic for a security expert, and two actions contradicted the classification.
+**Known limit:** Ambiguous alerts carry ready-made context flags (for example, whether the account is on a change ticket). Real alerts get this from enrichment, which is a product layer of its own. Triage quality depends on enrichment as much as
