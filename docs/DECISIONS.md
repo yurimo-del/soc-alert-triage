@@ -23,3 +23,29 @@
   * Dropping unknown keys from model output means extra fields are silently lost. This is accepted, because the strict stored schema keeps the data we keep in a known shape.
   * A changed schema invalidates existing fallback files. They must be re-recorded.
 * **Status:** Accepted
+
+## ADR-04: Figma only in Phase 2
+* **Context:** The prototype needs a working, testable product as early as possible. IBM Carbon (ADR-01) already provides the base patterns for data tables, statuses and badges, so a separate design pass in Figma would mostly redraw what Carbon ships. What Carbon does not cover is how the product earns trust: how AI evidence, confidence and review flags are shown to the analyst and the manager.
+* **Decision:** Phase 1 designs directly in code with IBM Carbon components. Figma is used in Phase 2, for the trust and explainability patterns and for the handover package.
+* **Consequences:**
+  * The fastest path to a working screen that can be tested with real interaction.
+  * No Figma files exist in Phase 1, so the code is the only record of the UI until Phase 2.
+  * Trust and explainability patterns are designed once, after the working screens show what is needed, not guessed up front.
+  * Phase 2 must produce Figma frames that match the built components, so the handover package (ADR-05) describes what exists.
+* **Status:** Accepted
+
+## ADR-05: Handover test with a React developer
+* **Context:** A prototype is only a product path if another engineer can pick it up. Documentation that its authors consider clear proves little. The claim needs evidence from someone who did not build it.
+* **Decision:** A React developer builds one screen from the handover package: tokens, components and `docs/HANDOVER.md`. We log every question they ask and every piece of rework needed. This log is the main evidence for Phase 3.
+* **Consequences:**
+  * The handover package must be complete enough to attempt the task without help from us. Unanswered gaps become logged questions, not silent fixes.
+  * Questions and rework are recorded as they happen, in a form that can be counted later. Any numbers in docs come from this log (no invented numbers).
+  * The result may show the package is not good enough. That is a valid finding, and the package is fixed from it.
+  * The test depends on the developer's availability, so Phase 3 timing depends on the call.
+* **Status:** Accepted. The developer has been contacted. The call is pending.
+
+## ADR-06: Styling: Carbon vs Tailwind
+* **Context:** Both `@carbon/react` and Tailwind are installed. Tailwind came with the project template. Two styling systems in one codebase would weaken the handover: a developer would not know which to use, and the same screen could be styled two ways.
+* **Decision:** Open. This must be decided before the first UI screen is built. Until then, no new UI is built with Tailwind (see `CLAUDE.md`).
+* **Consequences:** Pending. Whichever option is chosen, the other is removed or limited to a stated role, and the handover package describes a single styling approach.
+* **Status:** Open
