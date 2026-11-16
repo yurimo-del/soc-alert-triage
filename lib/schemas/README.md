@@ -9,6 +9,7 @@ Single source of truth for data shapes. Each schema is a [zod](https://zod.dev) 
 | `alert.ts` | `AlertSchema`, `Alert`, `AlertSource` |
 | `triage-result.ts` | `TriageModelOutputSchema`, `TriageResultSchema` and their types |
 | `review-rules.ts` | `computeReview()`, the human-review rules |
+| `eval-case.ts` | `EvalCaseSchema`, `EvalSetSchema`: ground truth for the eval set |
 
 ## Alert
 
@@ -42,6 +43,21 @@ The full result is the model output plus three things only code may set: `needs_
 | `needs_human_review` | Computed in code by `computeReview()`. Never taken from the model. |
 | `review_reasons` | Readable reasons why review is needed. Empty when `needs_human_review` is false. |
 | `meta` | Provenance: `provider`, `model`, `prompt_version`, and `source` (`live` for a real model call, `fallback` for a recorded response). |
+
+## Eval case
+
+One ground-truth case in `data/alerts/eval-set.json`: `{ alert, expected }`. Strict, like `Alert`. `alert` is a normal `Alert`. `expected` is what a correct triage looks like:
+
+| Field | Meaning |
+|---|---|
+| `severity`, `classification` | Correct labels for this alert. |
+| `action_type` | The correct recommended action type. |
+| `needs_human_review` | What `computeReview()` must return for the expected labels. |
+| `must_cite_fields` | `raw_payload` keys the evidence must reference. For ambiguous cases this includes one benign and one suspicious signal. |
+
+**Confidence is not part of the ground truth.** `expected` has no confidence, so `npm run validate:evals` calls `computeReview()` with a neutral `"high"`. It checks the severity, classification and action rules only. The low-confidence rule applies to live model output.
+
+`npm run validate:evals` also checks that ids are unique, `must_cite_fields` are real payload keys, all six sources are covered, and the data is synthetic (documentation or private IPs, `example.com` domains).
 
 ## Review rules
 
