@@ -1,0 +1,48 @@
+{
+  "severity": "High",
+  "classification": "needs_investigation",
+  "confidence": "low",
+  "summary": "A macro-enabled Excel attachment with an auto-execute macro arrived from a known vendor domain. The known sender is a benign signal, but an auto-executing macro in an unexpected financial statement is a common malware delivery method, and a compromised vendor account is possible. The alert has no sandbox result or authentication data, so the verdict cannot be confirmed either way.",
+  "evidence": [
+    {
+      "field": "sender_domain_known",
+      "value": "true",
+      "why": "The sender domain is a known vendor, which points toward legitimate business email."
+    },
+    {
+      "field": "sender",
+      "value": "accounts@vendor.example.com",
+      "why": "A statement from an accounts mailbox is a plausible business email, but a compromised vendor account would look identical."
+    },
+    {
+      "field": "attachment",
+      "value": "Q4-statement.xlsm",
+      "why": "A macro-enabled .xlsm for a statement is unusual, because vendors typically send PDFs or plain .xlsx files. This points toward malicious activity."
+    },
+    {
+      "field": "attachment_has_macro",
+      "value": "true",
+      "why": "Macros are a common way to deliver malware, which raises risk regardless of the sender."
+    },
+    {
+      "field": "macro_autoexec",
+      "value": "true",
+      "why": "The macro runs automatically on open, which is a strong malicious indicator and rarely justified in legitimate statements."
+    }
+  ],
+  "recommended_action": {
+    "type": "escalate",
+    "detail": "Escalate to L2. Hold or quarantine the email if it has not been opened. Detonate the attachment in a sandbox and inspect the macro code. Contact the vendor through a known channel to confirm they sent it. Check whether any recipient has opened the file, and isolate any host that did."
+  },
+  "needs_human_review": true,
+  "review_reasons": [
+    "Confidence is low",
+    "Classification is needs_investigation"
+  ],
+  "meta": {
+    "provider": "claude",
+    "model": "claude-sonnet-5-5",
+    "prompt_version": "triage-v1",
+    "source": "fallback"
+  }
+}

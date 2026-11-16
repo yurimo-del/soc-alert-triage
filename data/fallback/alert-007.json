@@ -1,0 +1,50 @@
+{
+  "severity": "Low",
+  "classification": "false_positive",
+  "confidence": "medium",
+  "summary": "The WAF blocked a GET request to the documentation search whose query was a natural-language question about escaping script tags in templates. The request looks like a developer searching docs rather than an XSS attempt. The internal source IP and same-site referer support this, although the encoded script tag is what tripped the rule.",
+  "evidence": [
+    {
+      "field": "uri",
+      "value": "/docs/search?q=how+to+escape+%3Cscript%3E+tags+in+templates",
+      "why": "Benign: the query is a plain-language question about escaping script tags, with no event handlers, JavaScript payload, or closing tag. Malicious-looking: it contains an encoded <script> tag, which is a legitimate trigger for XSS rules."
+    },
+    {
+      "field": "rule_id",
+      "value": "xss-001",
+      "why": "Malicious-looking: the XSS signature matched on the literal script tag token. Benign: this kind of keyword match often fires on documentation searches that mention HTML terms."
+    },
+    {
+      "field": "status_code",
+      "value": "403",
+      "why": "The WAF blocked the request, so any payload did not reach the application and the impact is limited."
+    },
+    {
+      "field": "source_ip",
+      "value": "10.20.4.17",
+      "why": "Benign: an internal RFC1918 address suggests an employee or developer rather than an external attacker. Malicious-looking: an internal host could still be compromised or probing, but there is no other sign of that."
+    },
+    {
+      "field": "referer",
+      "value": "https://docs.example.com/search",
+      "why": "Benign: the request came from the site's own search page, consistent with a user typing into the search box rather than crafted attack traffic."
+    },
+    {
+      "field": "method",
+      "value": "GET",
+      "why": "A simple search GET with a single query parameter, with no sign of repeated payload variations or automated fuzzing in this alert."
+    }
+  ],
+  "recommended_action": {
+    "type": "close",
+    "detail": "Close as a false positive. Optionally check whether source 10.20.4.17 produced other XSS rule hits in the same period, and consider tuning xss-001 for the docs search endpoint to cut noise from queries that mention HTML tags."
+  },
+  "needs_human_review": false,
+  "review_reasons": [],
+  "meta": {
+    "provider": "claude",
+    "model": "claude-sonnet-5-5",
+    "prompt_version": "triage-v1",
+    "source": "fallback"
+  }
+}

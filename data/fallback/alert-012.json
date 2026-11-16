@@ -1,0 +1,47 @@
+{
+  "severity": "Medium",
+  "classification": "needs_investigation",
+  "confidence": "medium",
+  "summary": "user-0377 sent about 8.4 GB to a personal cloud storage service. That is only about 1.3x their normal daily upload volume, so the size alone is not unusual for this user. The destination is an unsanctioned personal storage category, and the alert fired at 02:10 UTC, which may be off-hours. Data exfiltration cannot be ruled out or confirmed from this alert alone.",
+  "evidence": [
+    {
+      "field": "bytes_out",
+      "value": "8400000000",
+      "why": "About 8,400 MB went out in one event. That is a large transfer and could be bulk data exfiltration."
+    },
+    {
+      "field": "user_baseline_upload_mb_per_day",
+      "value": "6500",
+      "why": "The user normally uploads about 6.5 GB per day, so 8.4 GB is only modestly above baseline. This points toward benign, habitual heavy-upload behavior, such as backups or media work."
+    },
+    {
+      "field": "dest_category",
+      "value": "personal_cloud_storage",
+      "why": "Personal cloud storage is a common exfiltration channel and is often not allowed for corporate data. Even with a normal volume, the destination warrants review."
+    },
+    {
+      "field": "dest_host",
+      "value": "files.personal-cloud.example.com",
+      "why": "The destination is a consumer-style file host, not a known corporate-sanctioned service. Its approval status needs to be confirmed against policy."
+    },
+    {
+      "field": "user",
+      "value": "user-0377",
+      "why": "Needed to check whether this user has a history of similar uploads to this destination, any approved exceptions, or a role that handles large datasets. Resignation or HR flags would raise the risk."
+    }
+  ],
+  "recommended_action": {
+    "type": "escalate",
+    "detail": "Check whether user-0377 has uploaded to files.personal-cloud.example.com (203.0.113.120) before and whether an exception exists. Review DLP or proxy logs for the file names, types and sensitivity of the data sent. Ask the user or their manager about the business purpose, and check for HR risk flags. If the data is sensitive or the upload is unexplained, block the destination for this user and reset their credentials. If it is a documented personal or approved backup, close the alert."
+  },
+  "needs_human_review": true,
+  "review_reasons": [
+    "Classification is needs_investigation"
+  ],
+  "meta": {
+    "provider": "claude",
+    "model": "claude-sonnet-5-5",
+    "prompt_version": "triage-v1",
+    "source": "fallback"
+  }
+}

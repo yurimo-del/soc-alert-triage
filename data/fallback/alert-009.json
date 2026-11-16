@@ -1,0 +1,45 @@
+{
+  "severity": "Low",
+  "classification": "false_positive",
+  "confidence": "medium",
+  "summary": "vssadmin.exe ran a read-only 'list shadows' command, spawned by backup-agent.exe under the svc-backup service account on a file server. This looks like routine backup software checking existing shadow copies. Shadow copy enumeration can precede ransomware deletion, but nothing here shows deletion or other malicious behavior.",
+  "evidence": [
+    {
+      "field": "command_line",
+      "value": "vssadmin list shadows",
+      "why": "This is a read-only enumeration command, not 'delete shadows' or 'resize shadowstorage' that ransomware typically uses. However, enumeration alone can be attacker reconnaissance, so it is not fully conclusive."
+    },
+    {
+      "field": "parent_process",
+      "value": "backup-agent.exe",
+      "why": "A backup agent is an expected parent for VSS queries, which supports a benign backup workflow. The parent's legitimacy is not verified in the alert, so a masquerading binary cannot be ruled out."
+    },
+    {
+      "field": "user",
+      "value": "svc-backup",
+      "why": "A dedicated backup service account running a backup-related command is consistent with normal operations. Service accounts can be compromised, so this is supportive but not proof."
+    },
+    {
+      "field": "signature_status",
+      "value": "valid",
+      "why": "vssadmin.exe has a valid signature, indicating the genuine Windows binary rather than a tampered copy. Attackers often abuse legitimate signed tools, so this only rules out binary replacement."
+    },
+    {
+      "field": "host",
+      "value": "srv-file-02",
+      "why": "A file server is a typical host for backup and shadow copy activity, but it is also a high-value ransomware target, so any follow-on VSS deletion should be watched."
+    }
+  ],
+  "recommended_action": {
+    "type": "close",
+    "detail": "Close as expected backup activity after a quick check that backup-agent.exe is the approved binary and svc-backup runs this on a regular schedule (around 01:30 UTC). Escalate if vssadmin delete/resize commands or unusual activity from svc-backup appear on srv-file-02."
+  },
+  "needs_human_review": false,
+  "review_reasons": [],
+  "meta": {
+    "provider": "claude",
+    "model": "claude-sonnet-5-5",
+    "prompt_version": "triage-v1",
+    "source": "fallback"
+  }
+}

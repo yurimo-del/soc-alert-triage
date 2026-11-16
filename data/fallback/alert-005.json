@@ -1,0 +1,43 @@
+{
+  "severity": "Critical",
+  "classification": "true_positive",
+  "confidence": "high",
+  "summary": "Antivirus flagged invoice_2026.exe on ws-finance-07 as ransomware (Ransom.Generic.Encrypt) and the quarantine failed, so the file is likely still present and may be running. The file sits in a public, user-writable folder and has an invoice-themed name typical of phishing delivery. The host should be isolated immediately to limit encryption and lateral spread.",
+  "evidence": [
+    {
+      "field": "detection",
+      "value": "Ransom.Generic.Encrypt",
+      "why": "Malicious signal: the AV engine classified the file as ransomware with encryption behavior, a high-impact threat."
+    },
+    {
+      "field": "action_taken",
+      "value": "quarantine_failed",
+      "why": "Malicious signal: the malware was not contained and may still execute or already have run, so the threat is active."
+    },
+    {
+      "field": "path",
+      "value": "C:\\Users\\Public\\invoice_2026.exe",
+      "why": "Malicious signal: an executable with a lure-style invoice name in the world-writable Public folder is a common phishing or dropper pattern. A generic detection name could be a heuristic false positive, but the failed quarantine and suspicious location outweigh that."
+    },
+    {
+      "field": "host",
+      "value": "ws-finance-07",
+      "why": "Finance workstations often have access to sensitive data and file shares, which raises the impact and the risk of spread."
+    }
+  ],
+  "recommended_action": {
+    "type": "isolate_host",
+    "detail": "Analyst to confirm, then isolate ws-finance-07 from the network via EDR. Check for running processes from invoice_2026.exe, encrypted files or ransom notes, and mapped share activity. Preserve the file hash and a memory image, identify the delivery source such as email, and manually remove the file once forensics are captured. Escalate to incident response."
+  },
+  "needs_human_review": true,
+  "review_reasons": [
+    "Severity is Critical",
+    "Recommended action isolates a host"
+  ],
+  "meta": {
+    "provider": "claude",
+    "model": "claude-sonnet-5-5",
+    "prompt_version": "triage-v1",
+    "source": "fallback"
+  }
+}

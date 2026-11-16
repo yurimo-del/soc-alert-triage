@@ -7,9 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "validate:evals": "tsx scripts/validate-evals.ts"
+    "validate:evals": "tsx scripts/validate-evals.ts",
+    "triage:one": "tsx --env-file-if-exists=.env.local scripts/triage-one.ts",
+    "record:fallbacks": "tsx --env-file-if-exists=.env.local scripts/record-fallbacks.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
     "@carbon/react": "^1.120.0",
     "next": "16.4.6",
     "react": "19.3.0",

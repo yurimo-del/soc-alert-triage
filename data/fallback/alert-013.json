@@ -1,0 +1,47 @@
+{
+  "severity": "Medium",
+  "classification": "needs_investigation",
+  "confidence": "medium",
+  "summary": "A validly signed installer (setup-vendor.exe) created a scheduled task that runs an unsigned binary from C:\\Users\\Public on ws-sales-12. The signed installer and vendor-style task name suggest a legitimate software update checker, but an unsigned executable in a world-writable directory is a common persistence pattern. This cannot be resolved from the alert alone and needs verification of the binary and the install.",
+  "evidence": [
+    {
+      "field": "installer_signature_status",
+      "value": "valid",
+      "why": "The parent installer has a valid signature, which points to legitimate vendor software and benign activity."
+    },
+    {
+      "field": "task_name",
+      "value": "ExampleVendorUpdateCheck",
+      "why": "The name looks like a normal vendor update-check task, which supports a benign install, though attackers can also imitate vendor names."
+    },
+    {
+      "field": "task_binary_signed",
+      "value": "false",
+      "why": "The binary the task runs is unsigned, which is suspicious and inconsistent with the signed installer."
+    },
+    {
+      "field": "task_binary_path",
+      "value": "C:\\Users\\Public\\updchk.exe",
+      "why": "C:\\Users\\Public is writable by any user and is frequently used for staging malware and persistence, unlike a typical Program Files install location."
+    },
+    {
+      "field": "created_by_process",
+      "value": "setup-vendor.exe",
+      "why": "The task was created by the installer, which fits a legitimate install. However, a trojanized or tampered installer or a dropped payload would look the same, so the parent alone does not clear it."
+    }
+  ],
+  "recommended_action": {
+    "type": "escalate",
+    "detail": "Have an analyst hash updchk.exe and check it against threat intelligence and the vendor's published files. Confirm with the ws-sales-12 user or IT that the vendor software was intentionally installed. Review the task's trigger and action, and look for network connections from updchk.exe. If it is not verified as vendor-supplied, isolate the host and remove the task."
+  },
+  "needs_human_review": true,
+  "review_reasons": [
+    "Classification is needs_investigation"
+  ],
+  "meta": {
+    "provider": "claude",
+    "model": "claude-sonnet-5-5",
+    "prompt_version": "triage-v1",
+    "source": "fallback"
+  }
+}

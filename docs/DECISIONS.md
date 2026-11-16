@@ -49,3 +49,21 @@
 * **Decision:** Open. This must be decided before the first UI screen is built. Until then, no new UI is built with Tailwind (see `CLAUDE.md`).
 * **Consequences:** Pending. Whichever option is chosen, the other is removed or limited to a stated role, and the handover package describes a single styling approach.
 * **Status:** Open
+
+## ADR-07: AI provider adapter
+* **Context:** The product must not depend on one model vendor, and the demo must keep working without network or an API key. The app is deployed publicly on Vercel, and the triage route has no protection yet, so anyone who can reach it could trigger paid model calls.
+* **Decision:**
+  * Providers (`lib/ai/providers/`) implement one interface and return raw model output only. The pipeline in `lib/ai/triage.ts` owns everything else: a 20 s timeout (cancelled through an `AbortSignal`), validation with `TriageModelOutputSchema`, `computeReview()`, `meta`, and validation with `TriageResultSchema` (ADR-03).
+  * The provider is chosen by `AI_PROVIDER` (`claude`, `gemini`, `fallback`) and the model by `AI_MODEL`. The default model is `claude-sonnet-5-5`, so a developer can run the project from `.env.example`.
+  * Claude returns JSON through the API's structured output (`output_config.format`, built from the zod schema), not forced tool use. Current Claude models reject forced `tool_choice`.
+  * On any error, timeout or invalid output, the pipeline loads the recorded file `data/fallback/<alert-id>.json` and logs the reason server-side. If no valid fallback exists, it returns a typed error. It never invents a result.
+  * On Vercel, `AI_PROVIDER=fallback` and no API key is stored there. Live calls run only locally, until the route has protection.
+* **Consequences:**
+  * Adding a provider is one file. UI and route handlers never import a provider SDK.
+  * Fallback files must be recorded from real pipeline runs with `npm run record:fallbacks`, never written by hand (ADR-03). They must be re-recorded after a schema or prompt change.
+  * The UI must clearly label results with `meta.source: "fallback"` as recorded responses, so the analyst never mistakes them for a live verdict.
+  * A failed live call is visible to users only through `meta.source`. Details are in server logs, which never include the API key.
+  * Alert ids come from request bodies, so the fallback reader accepts only safe ids before building a file path.
+  * Fallback files are read by name at runtime, so `next.config.ts` lists them in `outputFileTracingIncludes` for the deployed build.
+  * Putting the route behind authentication and rate limiting is required before any public deployment runs live calls.
+* **Status:** Accepted

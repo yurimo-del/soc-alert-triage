@@ -1,0 +1,45 @@
+{
+  "severity": "High",
+  "classification": "true_positive",
+  "confidence": "medium",
+  "summary": "A GET request to the users API carried a classic SQL injection payload and came from the sqlmap scanner. The attack attempt is clear, but the 200 response does not show whether the injection worked or the WAF only logged it. Escalate to confirm whether data was exposed.",
+  "evidence": [
+    {
+      "field": "uri",
+      "value": "/api/v1/users?id=1' OR '1'='1",
+      "why": "This is a textbook boolean-based SQL injection payload in the id parameter, which points to malicious intent."
+    },
+    {
+      "field": "user_agent",
+      "value": "sqlmap/1.7",
+      "why": "This is the default user agent of the automated SQL injection tool sqlmap, so the traffic is a deliberate scan and not an accident."
+    },
+    {
+      "field": "status_code",
+      "value": "200",
+      "why": "A successful response means the request reached the application and may have returned data. It could also be a generic page or a WAF in detect-only mode, so it does not prove the injection succeeded."
+    },
+    {
+      "field": "source_ip",
+      "value": "198.51.100.23",
+      "why": "This external IP is the source of the scan. Check whether it made other requests or was seen in earlier alerts."
+    },
+    {
+      "field": "method",
+      "value": "GET",
+      "why": "A GET with the payload in the query string is a normal sqlmap probing pattern and is easy to replay and review in logs."
+    }
+  ],
+  "recommended_action": {
+    "type": "escalate",
+    "detail": "Escalate to L2 and the application owner. Check the response size and body for this request and look for other requests from 198.51.100.23 in WAF and web server logs. Review database and application logs around 2026-11-03T09:41:52Z for anomalous queries or bulk data reads. Confirm whether the WAF blocked or only detected the request, then block the source IP if the scan is confirmed."
+  },
+  "needs_human_review": false,
+  "review_reasons": [],
+  "meta": {
+    "provider": "claude",
+    "model": "claude-sonnet-5-5",
+    "prompt_version": "triage-v1",
+    "source": "fallback"
+  }
+}

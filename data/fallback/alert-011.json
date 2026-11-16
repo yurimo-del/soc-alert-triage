@@ -1,0 +1,43 @@
+{
+  "severity": "Medium",
+  "classification": "needs_investigation",
+  "confidence": "low",
+  "summary": "Account user-0142 logged in from Frankfurt and then Singapore 40 minutes apart, which is physically impossible without a VPN or other proxy. The second login came through the corporate VPN, which could explain the location mismatch, but it was made from an unregistered device, which is a possible sign of credential compromise. The signals conflict and cannot be resolved from this alert alone.",
+  "evidence": [
+    {
+      "field": "second_login_via_corporate_vpn",
+      "value": "true",
+      "why": "Benign signal: the Singapore login came through the corporate VPN, so the geolocation may reflect a VPN egress point and not the user's real location."
+    },
+    {
+      "field": "device_registered",
+      "value": "false",
+      "why": "Malicious signal: the login came from an unregistered device, which is consistent with an attacker using stolen credentials, or with a new legitimate device."
+    },
+    {
+      "field": "minutes_between",
+      "value": "40",
+      "why": "Malicious signal: 40 minutes is far too short to travel between Frankfurt and Singapore, so at least one login is not from the user's true location or is not the user."
+    },
+    {
+      "field": "first_login_location",
+      "value": "Frankfurt",
+      "why": "Context: Frankfurt may be the user's normal location. If so, the Singapore login through VPN is the anomaly to verify."
+    }
+  ],
+  "recommended_action": {
+    "type": "escalate",
+    "detail": "Escalate to L2 to check VPN session logs for user-0142 (who authenticated to the VPN, from what source IP, and whether MFA was passed). Confirm with the user or their manager whether they used a new device. If the VPN session or device cannot be verified, reset credentials and revoke active sessions."
+  },
+  "needs_human_review": true,
+  "review_reasons": [
+    "Confidence is low",
+    "Classification is needs_investigation"
+  ],
+  "meta": {
+    "provider": "claude",
+    "model": "claude-sonnet-5-5",
+    "prompt_version": "triage-v1",
+    "source": "fallback"
+  }
+}

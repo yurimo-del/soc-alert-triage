@@ -1,0 +1,47 @@
+{
+  "severity": "High",
+  "classification": "needs_investigation",
+  "confidence": "medium",
+  "summary": "The privileged account it-admin logged in successfully from 203.0.113.88 after 48 failed attempts within 10 minutes, a pattern consistent with a brute-force or password-spray compromise. The alert has no context on whether the source IP is known or whether the failures were a user mistyping or an automated service, so compromise cannot be confirmed or ruled out yet.",
+  "evidence": [
+    {
+      "field": "failed_attempts",
+      "value": "48",
+      "why": "48 failures in a short window is far beyond normal typos and points to automated guessing or credential stuffing, which is a malicious signal."
+    },
+    {
+      "field": "window_minutes",
+      "value": "10",
+      "why": "The high-velocity burst (about 5 attempts per minute) supports automated attack behavior rather than human error."
+    },
+    {
+      "field": "result",
+      "value": "success",
+      "why": "A successful login right after the failures suggests the attacker may have guessed the password. A stale-credential service or a locked-out admin retrying could also explain it, so this signal is ambiguous."
+    },
+    {
+      "field": "account",
+      "value": "it-admin",
+      "why": "This is a privileged account, so a compromise would have a high impact and justifies a fast response."
+    },
+    {
+      "field": "source_ip",
+      "value": "203.0.113.88",
+      "why": "There is no reputation, geolocation, or allowlist information. If the IP belongs to the corporate VPN or an admin workstation, this could be benign, but that is unverified."
+    }
+  ],
+  "recommended_action": {
+    "type": "escalate",
+    "detail": "Escalate to L2/IR now. Contact the it-admin owner out of band to confirm whether they made these logins. Check IAM and auth logs for post-login activity from 203.0.113.88 (new sessions, privilege changes, MFA changes, new accounts), and check the IP's reputation and whether it is a known corporate or VPN address. If the owner cannot confirm, reset the credentials, revoke active sessions, and block the IP."
+  },
+  "needs_human_review": true,
+  "review_reasons": [
+    "Classification is needs_investigation"
+  ],
+  "meta": {
+    "provider": "claude",
+    "model": "claude-sonnet-5-5",
+    "prompt_version": "triage-v1",
+    "source": "fallback"
+  }
+}

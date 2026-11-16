@@ -1,0 +1,40 @@
+{
+  "severity": "Low",
+  "classification": "false_positive",
+  "confidence": "medium",
+  "summary": "A browser updater running from its normal Program Files install path with a valid signature from the expected vendor modified a system file. This is consistent with routine update behavior, but the alert doesn't name the file that was changed, so that part can't be verified from the alert alone.",
+  "evidence": [
+    {
+      "field": "signature_status",
+      "value": "valid",
+      "why": "A valid code signature means the binary has not been tampered with and was signed by a trusted certificate, which points to benign activity."
+    },
+    {
+      "field": "signer",
+      "value": "Example Software Inc.",
+      "why": "The signer matches the browser vendor (ExampleBrowser), so the publisher is consistent with the process identity and supports a legitimate update."
+    },
+    {
+      "field": "path",
+      "value": "C:\\Program Files\\ExampleBrowser\\Application\\updater.exe",
+      "why": "The updater runs from the standard, admin-protected install directory of the browser rather than a temp or user-writable location, which points to benign activity."
+    },
+    {
+      "field": "action",
+      "value": "modified system file",
+      "why": "Modifying a system file is a behavior malware also uses, and the alert does not say which file was changed, so this is the one signal that could indicate malicious activity and prevents a high-confidence verdict."
+    }
+  ],
+  "recommended_action": {
+    "type": "close",
+    "detail": "Close as a likely false positive from a legitimate browser update. Optionally check the AV event details to confirm which system file was modified and that it matches the updater's expected behavior. Escalate only if the file is unrelated to the browser or the updater binary hash is unknown."
+  },
+  "needs_human_review": false,
+  "review_reasons": [],
+  "meta": {
+    "provider": "claude",
+    "model": "claude-sonnet-5-5",
+    "prompt_version": "triage-v1",
+    "source": "fallback"
+  }
+}

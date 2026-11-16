@@ -1,0 +1,47 @@
+{
+  "severity": "High",
+  "classification": "true_positive",
+  "confidence": "high",
+  "summary": "A user clicked a link in an email with classic credential-phishing traits: urgent mailbox-suspension wording, a login page on a verify-style domain, and an SPF failure. The click is confirmed, but the alert does not show whether credentials were entered. Treat the account as potentially compromised until that is checked.",
+  "evidence": [
+    {
+      "field": "spf_result",
+      "value": "fail",
+      "why": "The sending server is not authorized for the sender domain, which suggests spoofing or a malicious sender."
+    },
+    {
+      "field": "subject",
+      "value": "Your mailbox will be suspended today",
+      "why": "Urgency and a threat of account suspension are typical credential-phishing social engineering."
+    },
+    {
+      "field": "url",
+      "value": "https://account-verify.example.com/login",
+      "why": "A login page on a verify-style lookalike domain is consistent with a credential-harvesting page."
+    },
+    {
+      "field": "sender",
+      "value": "support@account-verify.example.com",
+      "why": "A generic support address on the same domain as the phishing URL is not a trusted internal or vendor sender."
+    },
+    {
+      "field": "user_clicked",
+      "value": "true",
+      "why": "The user visited the link, so exposure is confirmed. This does not prove credentials were submitted, which is the main unknown and the only mitigating gap in the evidence."
+    }
+  ],
+  "recommended_action": {
+    "type": "reset_credentials",
+    "detail": "Reset the user's password and revoke active sessions and tokens now as a precaution. Check proxy and web logs for a POST to account-verify.example.com to see whether credentials were submitted. Review the user's recent sign-ins and mailbox rules for suspicious activity. Block the domain and purge the email from other mailboxes."
+  },
+  "needs_human_review": true,
+  "review_reasons": [
+    "Recommended action resets credentials"
+  ],
+  "meta": {
+    "provider": "claude",
+    "model": "claude-sonnet-5-5",
+    "prompt_version": "triage-v1",
+    "source": "fallback"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "severity": "Medium",
+  "classification": "needs_investigation",
+  "confidence": "medium",
+  "summary": "PsExec was run from the IT jump host it-jump-01 to srv-app-04 using adm-user3 with SYSTEM privileges (-s), and ran only ipconfig /all. The activity falls inside a maintenance window and comes from an expected admin host, but the account is not on any change ticket, so authorization cannot be confirmed. The command is consistent with reconnaissance as well as routine admin work.",
+  "evidence": [
+    {
+      "field": "in_maintenance_window",
+      "value": "true",
+      "why": "Activity occurred during an approved maintenance window, which supports legitimate administrative work."
+    },
+    {
+      "field": "source_host",
+      "value": "it-jump-01",
+      "why": "The origin is a known IT jump host, where admin tooling like PsExec is expected, which leans benign."
+    },
+    {
+      "field": "account_on_change_ticket",
+      "value": "false",
+      "why": "The account adm-user3 is not on any change ticket, so the activity is not tied to approved work and may be unauthorized."
+    },
+    {
+      "field": "command_line",
+      "value": "psexec \\\\srv-app-04 -s cmd.exe /c ipconfig /all",
+      "why": "Running remotely as SYSTEM (-s) to collect network configuration is a common lateral movement and discovery pattern, though the command itself is low impact."
+    },
+    {
+      "field": "account",
+      "value": "adm-user3",
+      "why": "An admin account used for remote execution needs its ownership and purpose verified given the missing ticket."
+    }
+  ],
+  "recommended_action": {
+    "type": "escalate",
+    "detail": "Contact adm-user3's owner and the change manager to confirm whether this was authorized work during the maintenance window. Review other activity by adm-user3 and from it-jump-01 to srv-app-04 for follow-on commands. If it is not confirmed, reset adm-user3 credentials and investigate srv-app-04."
+  },
+  "needs_human_review": true,
+  "review_reasons": [
+    "Classification is needs_investigation"
+  ],
+  "meta": {
+    "provider": "claude",
+    "model": "claude-sonnet-5-5",
+    "prompt_version": "triage-v1",
+    "source": "fallback"
+  }
+}

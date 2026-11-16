@@ -1,0 +1,45 @@
+{
+  "severity": "Low",
+  "classification": "false_positive",
+  "confidence": "medium",
+  "summary": "A large outbound transfer (about 52 GB) from fs-backup-01 to backup.example.com started at 02:05, which fits the nightly 02:00 backup schedule to an approved destination. The volume is the only suspicious signal, and it is expected for a backup job. Medium confidence because the payload does not confirm the destination IP matches the approved host or that the volume matches the usual baseline.",
+  "evidence": [
+    {
+      "field": "schedule",
+      "value": "nightly 02:00",
+      "why": "Benign: the alert time (02:05Z) is just after the scheduled backup start, so the transfer matches expected activity."
+    },
+    {
+      "field": "destination_approved",
+      "value": "true",
+      "why": "Benign: the destination is flagged as an approved backup target, so this is not an unknown external endpoint."
+    },
+    {
+      "field": "src_host",
+      "value": "fs-backup-01",
+      "why": "Benign: the source is a dedicated backup file server, whose role is to move large volumes of data."
+    },
+    {
+      "field": "bytes_out",
+      "value": "52428800000",
+      "why": "Suspicious: about 52 GB outbound is a volume that would indicate exfiltration if the destination or schedule were not legitimate. It needs comparison to the usual nightly baseline."
+    },
+    {
+      "field": "dest_ip",
+      "value": "198.51.100.40",
+      "why": "Suspicious/unverified: the payload does not show that this IP resolves to backup.example.com or belongs to the approved target, so the approval flag is the only confirmation."
+    }
+  ],
+  "recommended_action": {
+    "type": "close",
+    "detail": "Close as expected backup activity after a quick check that 198.51.100.40 matches the approved backup.example.com record and that 52 GB is within the normal nightly range for fs-backup-01. If either check fails, reopen and escalate."
+  },
+  "needs_human_review": false,
+  "review_reasons": [],
+  "meta": {
+    "provider": "claude",
+    "model": "claude-sonnet-5-5",
+    "prompt_version": "triage-v1",
+    "source": "fallback"
+  }
+}

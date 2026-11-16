@@ -1,0 +1,47 @@
+{
+  "severity": "Medium",
+  "classification": "needs_investigation",
+  "confidence": "medium",
+  "summary": "A registered internal vulnerability scanner (10.30.0.25) generated 212 failed logins against hr-portal.example.com in 5 minutes. The source is a known scanner, which suggests benign testing, but the target is outside the approved scan scope, so this could be a misconfigured scan or misuse or compromise of the scanner. Verify scan authorization before deciding.",
+  "evidence": [
+    {
+      "field": "scanner_registered",
+      "value": "true",
+      "why": "The source IP is a registered vulnerability scanner, which points to authorized security tooling and a likely benign cause."
+    },
+    {
+      "field": "target_in_scan_scope",
+      "value": "false",
+      "why": "The HR portal is not in the approved scan scope, so this activity is unauthorized or misconfigured and could indicate scanner misuse or compromise."
+    },
+    {
+      "field": "failed_logins",
+      "value": "212",
+      "why": "A high volume of failed logins resembles credential brute-forcing against a sensitive HR system, though scanners can produce similar volume with credential checks."
+    },
+    {
+      "field": "window_minutes",
+      "value": "5",
+      "why": "212 attempts in 5 minutes is a rapid, automated rate, consistent with either a scan or an attack and does not separate the two."
+    },
+    {
+      "field": "source_ip",
+      "value": "10.30.0.25",
+      "why": "Internal source IP means any malicious use would involve an internal asset, raising the importance of confirming who initiated the activity."
+    }
+  ],
+  "recommended_action": {
+    "type": "escalate",
+    "detail": "Contact the vulnerability management team to confirm whether a scan was scheduled or mistakenly targeted hr-portal.example.com. Check scanner job configuration and the scanner host for unauthorized access, and review whether any of the 212 attempts succeeded on the HR portal. If no scan is confirmed, consider isolating the scanner and rotating its credentials."
+  },
+  "needs_human_review": true,
+  "review_reasons": [
+    "Classification is needs_investigation"
+  ],
+  "meta": {
+    "provider": "claude",
+    "model": "claude-sonnet-5-5",
+    "prompt_version": "triage-v1",
+    "source": "fallback"
+  }
+}
