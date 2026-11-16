@@ -39,9 +39,21 @@
 1. **Defining the Data Contract (JSON Schema / Zod):** Instead of designing screens, we map out the exact data structure the AI must return (severity badge, classification, plain-English reasoning, and actionable next steps).
 2. **Claude API & Zero-Failure Fallbacks:** Designing the integration logic with built-in spending safety limits, plus a smart fallback mechanism that swaps in pre-verified JSON responses if the API ever rate-limits or goes down.
 
----
+##### Set up the AI coding agent with rules, not reminders
+**What:** Moved coding to Claude Code (run from the Claude app, Cursor used as editor) and gave it project rules in `CLAUDE.md` plus hard limits in `.claude/settings.json`.
+**Why:** An agent that writes code in a public portfolio repo needs the same guardrails as a new team member: synthetic data only, no secrets, no commits on its own. Rules written as requests can be forgotten; tool settings cannot.
+**How:**
+1. Logged in with the Claude subscription. The API key for the app lives only in `.env.local`, because a key set as a system variable silently overrides the subscription.
+2. Wrote `CLAUDE.md`: purpose, hard rules, stack, structure, AI layer rules, report format.
+3. Blocked reading `.env.local`, `git commit` and `git push` in `.claude/settings.json`.
+**Lesson:** Setting up the agent is design work: you define its role, limits and how it reports back, the same way you would onboard a person.
+**AI note:** The first journal rule asked the agent to log every task. It produced noise, so the rule was changed to milestones only.
 
-## 2026-11-16 — Repo cleanup
-* Renamed package, set real page metadata, added `.env.example` and gitignore rules.
-* Merged the old sprint log into this journal. Kept all content, demoted headings to fit.
-* Learned: `.env*` ignores `.env.example` too, so it needs an explicit `!` exception.
+##### Defined the primary user and removed invented numbers
+**What:** The primary user is the L1/L2 SOC analyst; the secondary user is the SOC manager. Success criteria no longer contain made-up time savings. See ADR-02.
+**Why:** The analyst triages the alerts, so the screen is built for speed of decision. The manager sets review rules and must trust the system, which gives Phase 2 (trust) its story. Making the manager primary would turn the product into a dashboard instead of a triage tool. The earlier "5 minutes to 15 seconds" claim had no source, and an unsupported number in a portfolio project damages credibility more than having no number.
+**How:**
+1. Rewrote the User section of the one-pager.
+2. Replaced the metrics with criteria the eval set can actually measure.
+3. Recorded the decision as ADR-02.
+**Lesson:** In an AI product, honest success criteria come from evals, not from estimates. A number appears only after the first measured run.

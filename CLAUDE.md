@@ -60,7 +60,20 @@ The repository is part of the owner's portfolio. Keep it clean, documented and l
 ## Docs
 
 - All repo files in English.
-- After each task, add 2 to 4 lines to `docs/JOURNAL.md` under today's date: what was done, what was hard, what was learned. Plain and short.
+- `docs/JOURNAL.md` is the story of the sprint, not a change log. Git history already records what changed.
+- Write a journal entry only for a significant milestone: a product decision, an architecture decision, eval results, a problem that changed the approach, a handover step, or a change in how we work with AI agents. Skip renames, formatting and small fixes.
+- When a task completes a milestone, propose the entry in your report and add it only after the owner approves. The owner edits the wording.
+- Entry format, inside the current day section:
+
+  ##### <Milestone title>
+  **What:** one or two sentences.
+  **Why:** the reasoning and the alternative we rejected.
+  **How:** 2 to 4 short steps.
+  **Lesson:** what this teaches about taking an AI prototype to a product.
+  **AI note (optional):** where AI output helped or had to be corrected.
+
+- Each day section starts with: Date (YYYY-MM-DD, Day N of 21) and Focus (one sentence).
+- Link to the ADR when a milestone records a decision.
 - A new product or architecture decision gets a new ADR in `docs/DECISIONS.md`: Context, Decision, Consequences, Status.
 
 ## Commands
