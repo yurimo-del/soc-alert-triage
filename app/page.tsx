@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -37,6 +38,12 @@ export default function Home() {
             </a>{" "}
             center.
           </p>
+          <Link
+            href="/journal"
+            className="font-medium text-zinc-950 underline dark:text-zinc-50"
+          >
+            Read the build journal
+          </Link>
         </div>
         <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
           <a

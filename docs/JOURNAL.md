@@ -1,17 +1,3 @@
-# Engineering Journal
-
-## Day 1 — Foundation & Architecture Skeleton
-* **Completed:**
-  * Initialized repository structure and core documentation.
-  * Defined product One-Pager, core JTBD, and strict scope boundaries.
-  * Created initial synthetic evaluation dataset (`eval-set.json`).
-* **Challenges / Key Learnings:**
-  * Focused on defining rigid data schemas and contracts *before* designing UI components (Rule #0: Logic before screen).
-
----
-
-## Sprint Log (merged from "AI SPRING LOG.md")
-
 ### AI Sprint Log: SOC Alert Triage Journey
 
 #### Day 1: Foundation & Infrastructure
@@ -78,7 +64,7 @@
 3. `npm run validate:evals` checks the schema, that expected review flags match `computeReview()`, and that only documentation IPs and example.com domains are used.
 **Lesson:** Writing evals is product design. Deciding what counts as a correct answer, and when the right answer is "I'm not sure, ask a human", shapes the product more than the prompt does.
 **AI note:** The agent found two gaps in my spec: the review check needed a confidence value the expected results do not have, and running TypeScript without a new package meant changing import style across the code. I chose a dev-only tool instead, to keep the code conventional for the developer who will build from it. I also corrected its first draft: the "ambiguous" cases were clearly legitimate, one false positive was unrealistic for a security expert, and two actions contradicted the classification.
-**Known limit:** Ambiguous alerts carry ready-made context flags (for example, whether the account is on a change ticket). Real alerts get this from enrichment, which is a product layer of its own. Triage quality depends on enrichment as much as
+**Known limit:** Ambiguous alerts carry ready-made context flags (for example, whether the account is on a change ticket). Real alerts get this from enrichment, which is a product layer of its own. Triage quality depends on enrichment as much as on the model.
 
 ##### First live run: the AI knows when it does not know
 **What:** Built the AI provider adapter (Claude with structured output, recorded fallbacks, Gemini-ready) and ran all 15 eval alerts live once. The results are recorded as fallback files. See ADR-07.
@@ -90,3 +76,20 @@
 **Result (one run, not yet a baseline):** classification matched in 14 of 15 cases, and all 6 ambiguous alerts were marked needs_investigation instead of guessed. Mismatches: the AI chose escalation over decisive action three times, missed a key evidence field in two false positives, and was off by one severity level in two ambiguous cases.
 **Lesson:** The first live run already showed product questions, not only model errors: how much the AI may decide alone, and whether "close" deserves stronger evidence than "escalate". These are rules for the SOC manager to own, which is the core of Phase 2.
 **AI note:** The first live call failed with an authentication error. The pipeline returned an honest error instead of a fake result, which proved the fallback design before any real fallback existed.
+
+### Day 3: I drifted into engineering, stopped, and moved to my own design workflow
+
+**What:** Days 1 to 3 built a solid base: repo, Claude Code setup, primary user, data schemas, AI adapter with recorded fallbacks, a 15-alert eval set and an eval runner. But I spent much of that time on work that is not mine: writing expected labels myself, debating when the AI should escalate or close, and reviewing script details. Before the first baseline run, I stopped.
+
+**Why:** Two reasons.
+1. Deciding when to escalate, close or require human review is security expertise. My role is to orchestrate the loop: security defines the rules, I turn them into a concept, analysts test it, and what we learn goes back to security.
+2. The sprint goal was never to build an app by hand. It was to build my own AI-driven design workflow, as skills in Git, and use the SOC triage app as the object it works on.
+
+**How:**
+- Marked the expected labels and review rules as draft v0: an AI-assisted placeholder, pending expert review. The four open rule decisions became questions for a security reviewer from my network, with provisional defaults until then.
+- Delegated all engineering to Claude Code. I read only results.
+- Reframed the rest of the sprint around design skills: review, wireframe, critique and handover. Each runs in a loop: run, my feedback, fix the skill, run again. The eval report becomes the first input.
+
+**Lesson:** AI makes it easy to slide into whatever layer is in front of you. Expert drafts and engineering can be delegated in hours. Designer time goes to decisions, the concept, the people in the loop and the process itself.
+
+**AI note:** The AI advisor pulled me into the expert and engineering layers by framing those decisions as mine. I caught it by checking the work against the sprint's goal doc. Rule: check how AI frames my role against the goal, not only against the task.
