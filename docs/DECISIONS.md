@@ -67,3 +67,11 @@
   * Fallback files are read by name at runtime, so `next.config.ts` lists them in `outputFileTracingIncludes` for the deployed build.
   * Putting the route behind authentication and rate limiting is required before any public deployment runs live calls.
 * **Status:** Accepted
+
+## Pending security review
+Expected labels and review rules are draft v0, AI-assisted, pending security expert review. These questions are open. The current behavior of the code and the eval set is the provisional default until an expert answers.
+
+1. **Human review for every confirmed High threat.** Should a confirmed High `true_positive` always require human review, whatever the action? *Provisional default:* review is required only by the rules in `computeReview()` (low confidence, `needs_investigation`, Critical, or an isolate, block or reset action). A High threat whose action is `escalate` or `monitor` would not need review.
+2. **Severity tolerance for ambiguous alerts.** Should severity on ambiguous alerts be scored as exact or within ±1? *Provisional default:* the eval reports both and picks neither.
+3. **Label for alert-014.** Should the failed-login burst from a registered scanner outside its scan scope expect `monitor` or `escalate`? *Provisional default:* `monitor`.
+4. **Evidence needed to `close`.** Does `close` need more evidence than `escalate`? *Provisional default:* no extra rule. `close` needs no human review when confidence is not low, and the prompt says to use `false_positive` with high confidence only when the evidence is clear.

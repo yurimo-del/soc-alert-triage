@@ -9,6 +9,7 @@
     "lint": "eslint",
     "validate:evals": "tsx scripts/validate-evals.ts",
     "triage:one": "tsx --env-file-if-exists=.env.local scripts/triage-one.ts",
+    "eval": "tsx --env-file-if-exists=.env.local scripts/run-evals.ts",
     "record:fallbacks": "tsx --env-file-if-exists=.env.local scripts/record-fallbacks.ts"
   },
   "dependencies": {

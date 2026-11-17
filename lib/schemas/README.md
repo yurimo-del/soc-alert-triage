@@ -46,6 +46,8 @@ The full result is the model output plus three things only code may set: `needs_
 
 ## Eval case
 
+> **Status:** Expected labels and review rules are draft v0, AI-assisted, pending security expert review.
+
 One ground-truth case in `data/alerts/eval-set.json`: `{ alert, expected }`. Strict, like `Alert`. `alert` is a normal `Alert`. `expected` is what a correct triage looks like:
 
 | Field | Meaning |

