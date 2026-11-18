@@ -14,7 +14,7 @@
 3. **Actionable Recommendation:** Clear next step for the engineer (e.g., *Isolate host*, *Ignore*, *Escalate to L2*).
 
 ## 4. Success Criteria
-1. Triage quality is measured on the 15-alert eval set. Baseline: TBD after first eval run.
+1. Triage quality is measured on the 15-alert eval set. Baseline: see [docs/evals/2026-11-17-baseline.md](evals/2026-11-17-baseline.md).
 2. Ambiguous alerts are flagged for human review instead of guessed.
 3. Every verdict cites the alert fields it is based on.
 4. The demo works offline via recorded responses.
