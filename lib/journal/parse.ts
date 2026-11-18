@@ -12,7 +12,9 @@ export type ListNode = {
 export type Block =
   | { type: "heading"; level: number; content: Inline[] }
   | { type: "paragraph"; content: Inline[] }
-  | { type: "list"; list: ListNode };
+  | { type: "list"; list: ListNode }
+  // Consecutive image lines form one row. Only local /journal/ files are allowed.
+  | { type: "images"; images: { alt: string; src: string }[] };
 
 export type DayCard = {
   day: number;
@@ -26,6 +28,9 @@ const HEADING = /^(#{1,6})\s+(.*?)\s*#*\s*$/;
 const DAY_HEADING = /^Day\s+(\d+)\b\s*(?:[—–:-]\s*)?(.*)$/i;
 const LIST_ITEM = /^(\s*)([*-]|\d+\.)\s+(.*)$/;
 const RULE = /^\s*(-{3,}|\*{3,}|_{3,})\s*$/;
+// ![alt](/journal/path.jpg). A remote URL or any other path does not match,
+// so it stays plain escaped text.
+const IMAGE = /^!\[([^\]]*)\]\((\/journal\/[A-Za-z0-9._/-]+)\)\s*$/;
 
 export function parseInline(text: string): Inline[] {
   const out: Inline[] = [];
@@ -82,7 +87,12 @@ function parseBlocks(lines: string[]): Block[] {
   const blocks: Block[] = [];
   let paragraph: string[] = [];
   let entries: ListEntry[] = [];
+  let images: { alt: string; src: string }[] = [];
 
+  const flushImages = () => {
+    if (images.length > 0) blocks.push({ type: "images", images });
+    images = [];
+  };
   const flushParagraph = () => {
     if (paragraph.length > 0)
       blocks.push({ type: "paragraph", content: parseInline(paragraph.join(" ")) });
@@ -96,6 +106,15 @@ function parseBlocks(lines: string[]): Block[] {
   for (const line of lines) {
     const heading = HEADING.exec(line);
     const item = LIST_ITEM.exec(line);
+    const image = IMAGE.exec(line);
+
+    if (image) {
+      flushParagraph();
+      flushList();
+      images.push({ alt: image[1], src: image[2] });
+      continue;
+    }
+    flushImages();
 
     if (line.trim() === "" || RULE.test(line)) {
       flushParagraph();
@@ -123,6 +142,7 @@ function parseBlocks(lines: string[]): Block[] {
       paragraph.push(line.trim());
     }
   }
+  flushImages();
   flushParagraph();
   flushList();
   return blocks;

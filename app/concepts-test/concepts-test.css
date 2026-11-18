@@ -1,0 +1,118 @@
+/* Plain greyscale CSS for /concepts-test only. Prefixed because the Tailwind rule in next.config.ts breaks CSS Modules. No Carbon, no Tailwind (ADR-06 is open). */
+
+.concepts-test-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+  background: #fff;
+  color: #222;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.concepts-test-page h1 { font-size: 26px; margin: 0 0 8px; }
+.concepts-test-page h2 { font-size: 20px; margin: 32px 0 8px; }
+.concepts-test-page p { margin: 4px 0 8px; }
+.concepts-test-status { color: #555; }
+.concepts-test-scroll { overflow-x: auto; }
+
+.concepts-test-toggle { position: absolute; opacity: 0; pointer-events: none; }
+.concepts-test-toggle-label { display: inline-block; border: 1px solid #555; padding: 4px 10px; cursor: pointer; font-size: 13px; background: #eee; }
+.concepts-test-toggle:checked + header .concepts-test-toggle-label { background: #555; color: #fff; }
+.concepts-test-toggle:focus-visible + header .concepts-test-toggle-label { outline: 2px solid #222; outline-offset: 2px; }
+
+.concepts-test-table { border-collapse: collapse; width: 100%; min-width: 860px; font-size: 13px; }
+.concepts-test-table th,
+.concepts-test-table td { border: 1px solid #999; padding: 8px; text-align: left; vertical-align: top; }
+.concepts-test-table thead th { background: #e5e5e5; }
+.concepts-test-table tbody th { background: #f2f2f2; width: 150px; }
+
+.concepts-test-concept { border-top: 2px solid #222; margin-top: 40px; }
+.concepts-test-kind { font-size: 12px; font-weight: normal; border: 1px solid #666; padding: 1px 6px; margin-left: 8px; color: #444; }
+.concepts-test-tradeoff { color: #444; font-style: italic; margin-top: 12px; }
+
+/* One main frame next to a column of small state thumbnails. */
+.concepts-test-layout { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 16px; align-items: start; }
+.concepts-test-thumbs { display: grid; gap: 12px; }
+.concepts-test-thumb { margin: 0; }
+.concepts-test-thumb figcaption { font-size: 12px; color: #555; margin-top: 4px; }
+
+/* The frame scales as one picture: everything inside is in em, font size comes from the width. */
+.concepts-test-screen { container-type: inline-size; }
+.concepts-test-frame {
+  font-size: 1.7cqw;
+  line-height: 1.2;
+  aspect-ratio: 16 / 10;
+  display: grid;
+  grid-template-columns: 14% 1fr;
+  grid-template-rows: 9% 1fr;
+  grid-template-areas: "header header" "nav content";
+  position: relative;
+  border: 2px solid #444;
+  background: #fff;
+  overflow: hidden;
+}
+.concepts-test-frame-nonav { grid-template-columns: 1fr; grid-template-areas: "header" "content"; }
+
+.concepts-test-header { grid-area: header; background: #ddd; border-bottom: 1px solid #888; position: relative; padding: 0 1em; display: flex; align-items: center; }
+.concepts-test-header-bars { display: flex; gap: 1em; width: 100%; }
+.concepts-test-nav { grid-area: nav; background: #eaeaea; border-right: 1px solid #888; padding: 1em 0.8em; position: relative; }
+.concepts-test-content { grid-area: content; position: relative; overflow: hidden; }
+
+/* The overlay shares the content cell and sits on top of it. */
+.concepts-test-overlay { grid-area: content; position: relative; z-index: 2; display: grid; padding: 1em; pointer-events: none; }
+.concepts-test-dim { background: rgba(0, 0, 0, 0.35); }
+.concepts-test-overlay-item { background: #fff; width: 48%; max-height: 100%; overflow: hidden; border: 1px solid #333; padding: 0.5em; }
+.concepts-test-at-center { place-items: center; }
+.concepts-test-at-bottom-right { place-items: end end; padding: 0 1em; }
+.concepts-test-at-bottom-right .concepts-test-overlay-item { width: 40%; }
+.concepts-test-at-bottom-left { place-items: end start; }
+.concepts-test-at-bottom-left .concepts-test-overlay-item { width: 36%; }
+.concepts-test-at-top-right { place-items: start end; }
+.concepts-test-at-top-right .concepts-test-overlay-item { width: 30%; }
+.concepts-test-at-top { place-items: start center; }
+.concepts-test-at-top .concepts-test-overlay-item { width: 70%; }
+
+/* Background content: grey bars, no text. */
+.concepts-test-bar { height: 1.1em; background: #ccc; margin-bottom: 0.7em; }
+.concepts-test-bar-tall { height: 3em; }
+.concepts-test-w30 { width: 30%; margin: 0; }
+.concepts-test-w20 { width: 20%; margin: 0; }
+.concepts-test-inbox { padding: 1em; position: relative; }
+
+/* Blocks: one line of text at most. Labels hidden by default, above the block when shown. */
+.concepts-test-block { position: relative; margin-bottom: 0.5em; }
+.concepts-test-box { border: 1px solid #888; background: #f0f0f0; padding: 0.4em 0.5em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.concepts-test-box .concepts-test-box { background: #fff; }
+.concepts-test-primary { background: #555 !important; color: #fff; }
+.concepts-test-fieldname { font-size: 0.85em; margin-bottom: 0.2em; }
+.concepts-test-input { height: 1.8em; border: 1px solid #999; background: #fff; }
+.concepts-test-input-tall { height: 5em; }
+.concepts-test-input-canvas { height: 14em; }
+.concepts-test-row { display: flex; gap: 0.5em; }
+.concepts-test-row .concepts-test-block { margin-bottom: 0; }
+
+.concepts-test-label { display: none; position: absolute; left: 0; top: -1.15em; font-family: monospace; font-size: 0.7em; line-height: 1; color: #444; background: #fff; padding: 0 2px; white-space: nowrap; z-index: 5; }
+.concepts-test-toggle:checked ~ section .concepts-test-main .concepts-test-label { display: block; }
+.concepts-test-toggle:checked ~ section .concepts-test-main .concepts-test-block { margin-top: 1.3em; }
+.concepts-test-toggle:checked ~ section .concepts-test-main .concepts-test-header,
+.concepts-test-toggle:checked ~ section .concepts-test-main .concepts-test-nav,
+.concepts-test-toggle:checked ~ section .concepts-test-main .concepts-test-inbox { padding-top: 1.6em; }
+
+/* Concept C: three regions replace the inbox. */
+.concepts-test-workspace { display: grid; grid-template-columns: 22% 1fr 22%; gap: 1em; padding: 1em; height: 100%; }
+.concepts-test-faded { opacity: 0.4; }
+.concepts-test-col { min-width: 0; }
+
+/* Thumbnails: same frame, text hidden, no labels. */
+.concepts-test-thumbs .concepts-test-box,
+.concepts-test-thumbs .concepts-test-fieldname { color: transparent; }
+.concepts-test-thumbs .concepts-test-primary { color: transparent; }
+.concepts-test-thumbs .concepts-test-label { display: none !important; }
+.concepts-test-thumbs .concepts-test-block { margin-top: 0 !important; }
+
+@media (max-width: 760px) {
+  .concepts-test-layout { grid-template-columns: 1fr; }
+  .concepts-test-thumbs { grid-template-columns: 1fr 1fr; }
+}

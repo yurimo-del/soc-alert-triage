@@ -166,6 +166,46 @@
   margin: 0 0 14px;
 }
 
+/* Screenshot row. Full-page screenshots are tall, so each is cropped to a fixed
+   window from the top. Click opens the full image. */
+.journal-figures {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 8px 0 20px;
+}
+
+.journal-figure {
+  margin: 0;
+}
+
+.journal-figure a {
+  display: block;
+  height: 320px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.journal-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.journal-figure figcaption {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+@media (max-width: 720px) {
+  .journal-figures {
+    grid-template-columns: 1fr;
+  }
+}
+
 .journal-body h3 {
   margin: 32px 0 10px;
   font-size: 20px;

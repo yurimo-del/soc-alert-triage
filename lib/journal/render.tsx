@@ -44,6 +44,21 @@ function renderBlock(block: Block, cardLevel: number, key: number): ReactNode {
       return <p key={key}>{renderInline(block.content)}</p>;
     case "list":
       return renderList(block.list, key);
+    case "images":
+      return (
+        <div key={key} className="journal-figures">
+          {block.images.map((img, i) => (
+            <figure key={i} className="journal-figure">
+              <a href={img.src} target="_blank" rel="noopener noreferrer">
+                {/* Plain img: the screenshots have no known size, so next/image does not fit. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={img.src} alt={img.alt} loading="lazy" />
+              </a>
+              <figcaption>{img.alt}</figcaption>
+            </figure>
+          ))}
+        </div>
+      );
   }
 }
 

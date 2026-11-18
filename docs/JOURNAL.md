@@ -94,7 +94,7 @@
 
 **AI note:** The AI advisor pulled me into the expert and engineering layers by framing those decisions as mine. I caught it by checking the work against the sprint's goal doc. Rule: check how AI frames my role against the goal, not only against the task.
 
-## Day 4, 18 Nov 2026: The workflow is the product
+### Day 4: 18 Nov 2026: The workflow is the product
 
 **What**
 Rebuilt the sprint plan around two things I bring as a designer:
@@ -133,3 +133,29 @@ The AI advisor kept handing me its conclusions instead of the data.
 It took four corrections to get back to a design order. Same pattern
 as day 3: AI pulls you into whatever layer is in front of it.
 Check its framing against the goal.
+
+#### Calibrating the wireframe skill
+
+**What**
+
+The ready-made wireframe skill only works on Mac. I took the idea and
+made my own small skill. Then I tested it on a simple case first: a dialog
+to send an email. Not SOC yet.
+
+- v0: the 3 concepts looked the same. Only the text was different.
+  My rule: draw the whole screen, and concepts must look different
+  even if you blur the text.
+- v1: the screens broke and the AI did not notice. It cannot see what
+  it draws. My rule: I send it a screenshot, it checks itself before
+  showing me.
+- v2: it worked. Three real concepts, different at a glance.
+
+3 versions, 2 rounds of fixes, 10 rules from me.
+
+![v0: three concepts that look the same, only the labels differ](/journal/day-04/test-concept-v0.jpg)
+![v1: full screens, but the layout is broken and unreadable](/journal/day-04/test-concept-v1.jpg)
+![v2: three concepts that differ at a glance](/journal/day-04/test-concept-v2.jpg)
+
+**Lesson:** test a new skill on a simple case before the real one.
+The AI does not see its own output, so the designer's eye is the check.
+
