@@ -93,3 +93,43 @@
 **Lesson:** AI makes it easy to slide into whatever layer is in front of you. Expert drafts and engineering can be delegated in hours. Designer time goes to decisions, the concept, the people in the loop and the process itself.
 
 **AI note:** The AI advisor pulled me into the expert and engineering layers by framing those decisions as mine. I caught it by checking the work against the sprint's goal doc. Rule: check how AI frames my role against the goal, not only against the task.
+
+## Day 4, 18 Nov 2026: The workflow is the product
+
+**What**
+Rebuilt the sprint plan around two things I bring as a designer:
+professional judgment and handover to developers. Everything else
+(evals, wireframes, prototype) is orchestration around these two points.
+New order: requirements, then 3+ wireframe concepts, then each concept
+tested against real AI behavior from the eval, then a decision.
+Then an interactive prototype and a handover to a real developer.
+
+**Why**
+After the baseline eval, the AI advisor started from the data and its own
+conclusions: a table of alerts, then "scenarios" it had already labeled.
+As a designer I could not use it. A raw eval table tells me nothing until
+I see what it does to a screen. The plan also had four design skills of
+equal weight, which says "many AI tools", not "better decisions".
+
+**How**
+- Requirements and eval labels are taken as given. They are simulated
+  (draft v0) and I say so. The sprint proves the process, not security content.
+- Wireframes and the prototype use existing skills and tools.
+- One skill of my own: judgment-loop. It shows each concept with real AI
+  answers in plain language. It does not judge. I judge, and my verdicts
+  become rules in the skill.
+- I do the first iteration by hand, then write the skill from it.
+- Each iteration is measured: my corrections and time spent.
+- Real people sit at the judgment points: a security reviewer and a SOC
+  analyst. A real developer tests the handover.
+
+**Lesson**
+The design process sets the order. Data serves judgment, not the other way
+around. A skill explains, the designer judges. Simulate what is not the
+point, keep real people where judgment gets checked.
+
+**AI note**
+The AI advisor kept handing me its conclusions instead of the data.
+It took four corrections to get back to a design order. Same pattern
+as day 3: AI pulls you into whatever layer is in front of it.
+Check its framing against the goal.

@@ -75,3 +75,21 @@ Expected labels and review rules are draft v0, AI-assisted, pending security exp
 2. **Severity tolerance for ambiguous alerts.** Should severity on ambiguous alerts be scored as exact or within ±1? *Provisional default:* the eval reports both and picks neither.
 3. **Label for alert-014.** Should the failed-login burst from a registered scanner outside its scan scope expect `monitor` or `escalate`? *Provisional default:* `monitor`.
 4. **Evidence needed to `close`.** Does `close` need more evidence than `escalate`? *Provisional default:* no extra rule. `close` needs no human review when confidence is not low, and the prompt says to use `false_positive` with high confidence only when the evidence is clear.
+
+## ADR-08: Workflow built around professional judgment and handover
+
+- **Status:** Accepted
+- **Context:** The plan had four design skills of equal weight (review, wireframe, critique, handover) and started from eval data. That showed "many AI tools", not better decisions. In a real organization anyone can build a prototype. The hard part is choosing the right one and taking it to a product.
+- **Decision:**
+  - The workflow has two cores: professional judgment and handover to developers.
+  - Order: requirements, then 3+ wireframe concepts, then each concept tested against real AI behavior from evals, then a decision, then an interactive prototype, then handover.
+  - Requirements and eval labels are taken as given. They are simulated (draft v0) and marked as such.
+  - Wireframe and prototype use existing skills and tools. One own skill: judgment-loop. It prepares material for judgment and does not judge. The first iteration is done by hand, then the skill is written from it.
+  - Each judgment iteration is measured: number of designer corrections and time spent.
+  - At least one real domain person reviews at a judgment point.
+- **Consequences:**
+  - Critique skill dropped, replaced by live review.
+  - ADR-04: Figma becomes optional.
+  - ADR-05 stays: the developer test is the second core proof.
+  - The case study must state that requirements and labels are simulated.
+  
