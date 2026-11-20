@@ -1,7 +1,7 @@
 ### AI Sprint Log: SOC Alert Triage Journey
 
 #### Day 1: Foundation & Infrastructure
-* **Date:** Day 1 of 21-day Sprint
+* **Date:** Day 1 of 21-day Sprint (November 15, 2026)
 * **Focus:** Setting up a professional engineering skeleton, establishing product boundaries, and deploying the first live frame.
 
 **What we did step by step:**
@@ -17,7 +17,7 @@
 ---
 
 #### Day 2: Data Contracts & Fallback Architecture
-* **Date:** Day 2 of 21-day Sprint
+* **Date:** Day 2 of 21-day Sprint (November 16, 2026)
 * **Focus:** Moving from infrastructure to logic. Defining what the AI agent actually returns and protecting the public demo from failing.
 
 **What we are doing today:**
@@ -78,6 +78,8 @@
 **AI note:** The first live call failed with an authentication error. The pipeline returned an honest error instead of a fake result, which proved the fallback design before any real fallback existed.
 
 ### Day 3: I drifted into engineering, stopped, and moved to my own design workflow
+* **Date:** Day 3 of 21-day Sprint (November 17, 2026)
+* **Focus:** Moving from engineering back to design. Stopping my drift into code and expert work, and choosing my own design skills workflow.
 
 **What:** Days 1 to 3 built a solid base: repo, Claude Code setup, primary user, data schemas, AI adapter with recorded fallbacks, a 15-alert eval set and an eval runner. But I spent much of that time on work that is not mine: writing expected labels myself, debating when the AI should escalate or close, and reviewing script details. Before the first baseline run, I stopped.
 
@@ -94,7 +96,9 @@
 
 **AI note:** The AI advisor pulled me into the expert and engineering layers by framing those decisions as mine. I caught it by checking the work against the sprint's goal doc. Rule: check how AI frames my role against the goal, not only against the task.
 
-### Day 4: 18 Nov 2026: The workflow is the product
+### Day 4: The workflow is the product
+* **Date:** Day 4 of 21-day Sprint (November 18, 2026)
+* **Focus:** Rebuilding the workflow around two cores: professional judgment and handover. Writing requirements v0 and calibrating my wireframe skill on a simple case.
 
 **What**
 Rebuilt the sprint plan around two things I bring as a designer:
@@ -159,3 +163,37 @@ to send an email. Not SOC yet.
 **Lesson:** test a new skill on a simple case before the real one.
 The AI does not see its own output, so the designer's eye is the check.
 
+## Day 5: Wireframe concepts from requirements
+* **Date:** Day 5 of 21-day Sprint (November 19, 2026)
+* **Focus:** From requirements to concepts. Three wireframe concepts, drawn as if the AI were always right, and my first review as a product designer.
+
+**What:** My wireframe skill made 3 concepts from REQUIREMENTS.md v0. Each concept has a list and detail screens for alert-006, alert-003 and alert-011. Each concept has its own page, with the design questions and its answers on top. Key prompts are saved in docs/prompts/.
+
+- [Concept A: ranked queue](/concepts/a)
+- [Concept B: lanes](/concepts/b)
+- [Concept C: case file, one alert at a time](/concepts/c)
+
+**Why:** Step 2 of the workflow. Draw the concepts as if the AI were always right, before we look at real AI behavior.
+
+**How:** I reviewed the agent's plan before it built anything, then reviewed the 3 concepts as a product designer.
+
+My corrections to the plan:
+- The AI drew the real AI answer for alert-003. In this step the AI must be always right, so I asked for the expected label.
+- The skill hid the AI reasoning behind grey bars. I asked to show the real text, cut to one line.
+- I decided to save my key prompts in the repo. They show how I steer the agent.
+
+My corrections to the concepts:
+- The table sorts by review, then severity, then time, but the columns are in another order. I asked to put these columns side by side, in the same order.
+- The concept says that opening the panel is a review. It is not. The real flow is two clicks: select, then confirm or reject.
+- On the detail panel, "needs human review" is far from severity. I asked for the same order as in the table.
+- Confirm and Reject are far from the review status they decide. I asked to put them next to it.
+- After confirm or reject, the item status does not change. I asked to show the new state.
+- The pop-up uses two columns. A pop-up must be top-down, so the eye can scan it.
+- With many screens I forgot the design questions. I asked to show the questions and answers before each concept.
+- B showed the split between quick confirm and review best. C was best overall. I picked C as the base and asked to add the B split as a switch on the list.
+- All 3 concepts were on one page, so I could not link to one concept. I asked for one page per concept, with its own questions and answers on top.
+- The concept titles were links, but they did not look like links. I asked to make them look clickable.
+
+**Lesson:** Most of my corrections were one rule: what belongs together must sit together, in the same order. Sort order, column order, detail order. An action sits next to the status it changes. These are general rules, so they go into the skill, not only into one concept. Today the skill got the first one: one page per concept. The rest go in with concept C v2.
+
+**AI note:** The agent described opening a panel as a review. It was not. The AI describes the flow it wants, not the flow it drew. Count the clicks. Also, the skill's self-check passed all its rules and found none of my corrections. It checks how the screen is drawn, not if the logic is right.

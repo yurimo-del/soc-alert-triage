@@ -248,6 +248,16 @@
   font-weight: 700;
 }
 
+.journal-body a {
+  color: var(--blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.journal-body a:hover {
+  background: var(--lavender);
+}
+
 .journal-body code {
   padding: 1px 6px;
   border-radius: 6px;

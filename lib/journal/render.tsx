@@ -12,6 +12,19 @@ function renderInline(content: Inline[]): ReactNode[] {
         return <em key={i}>{part.value}</em>;
       case "code":
         return <code key={i}>{part.value}</code>;
+      case "link": {
+        // Absolute links leave the site, so they open in a new tab.
+        const external = part.href.startsWith("https://");
+        return (
+          <a
+            key={i}
+            href={part.href}
+            {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+          >
+            {part.value}
+          </a>
+        );
+      }
       default:
         return part.value;
     }

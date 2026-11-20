@@ -1,8 +1,10 @@
 // Parses docs/JOURNAL.md into day cards. Handles only the markdown the journal
-// uses: headings, paragraphs, bold, italic, inline code, nested lists, rules.
+// uses: headings, paragraphs, bold, italic, inline code, links, nested lists, rules.
 // Pure functions, no I/O.
 
-export type Inline = { kind: "text" | "bold" | "italic" | "code"; value: string };
+export type Inline =
+  | { kind: "text" | "bold" | "italic" | "code"; value: string }
+  | { kind: "link"; value: string; href: string };
 
 export type ListNode = {
   ordered: boolean;
@@ -32,15 +34,22 @@ const RULE = /^\s*(-{3,}|\*{3,}|_{3,})\s*$/;
 // so it stays plain escaped text.
 const IMAGE = /^!\[([^\]]*)\]\((\/journal\/[A-Za-z0-9._/-]+)\)\s*$/;
 
+// Only https URLs and site paths become links. Anything else (javascript:, data:,
+// protocol-relative //host) stays plain escaped text.
+const SAFE_HREF = /^(https:\/\/\S+|\/(?!\/)\S*)$/;
+
 export function parseInline(text: string): Inline[] {
   const out: Inline[] = [];
-  const re = /\*\*([^*]+)\*\*|`([^`]+)`|\*([^*\s][^*]*)\*/g;
+  const re = /\[([^\]]+)\]\(([^)\s]+)\)|\*\*([^*]+)\*\*|`([^`]+)`|\*([^*\s][^*]*)\*/g;
   let last = 0;
   for (const m of text.matchAll(re)) {
     if (m.index > last) out.push({ kind: "text", value: text.slice(last, m.index) });
-    if (m[1] !== undefined) out.push({ kind: "bold", value: m[1] });
-    else if (m[2] !== undefined) out.push({ kind: "code", value: m[2] });
-    else out.push({ kind: "italic", value: m[3] });
+    if (m[1] !== undefined) {
+      if (SAFE_HREF.test(m[2])) out.push({ kind: "link", value: m[1], href: m[2] });
+      else out.push({ kind: "text", value: m[0] });
+    } else if (m[3] !== undefined) out.push({ kind: "bold", value: m[3] });
+    else if (m[4] !== undefined) out.push({ kind: "code", value: m[4] });
+    else out.push({ kind: "italic", value: m[5] });
     last = m.index + m[0].length;
   }
   if (last < text.length) out.push({ kind: "text", value: text.slice(last) });

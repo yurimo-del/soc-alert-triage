@@ -44,6 +44,7 @@ After the build passes, do not report yet. Ask the user for a screenshot of the 
 2. The design questions (given or assumed).
 3. **Comparison table:** one row per concept, one column per question. Each cell is a short answer.
 4. One section per concept, in this order: name, a one-line idea, a tag "conservative" or "novel", then its screens or states.
+5. Each concept gets its own page, with its own questions-and-answers header. The index page holds the comparison table and links to each concept.
 
 ## Rules
 - **Greyscale only.** No colors, no icons, no images, no brand styling. Use borders, grey fills and text weight.

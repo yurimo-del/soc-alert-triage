@@ -1,0 +1,160 @@
+/* Plain greyscale CSS for /concepts only. Prefixed because the Tailwind rule in next.config.ts breaks CSS Modules. No Carbon, no Tailwind (ADR-06 is open). */
+
+.concepts-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+  background: #fff;
+  color: #222;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.concepts-page h1 { font-size: 26px; margin: 0 0 8px; }
+.concepts-page h2 { font-size: 20px; margin: 32px 0 8px; }
+.concepts-page p { margin: 4px 0 8px; }
+.concepts-status { color: #555; }
+.concepts-scroll { overflow-x: auto; }
+
+.concepts-toggle { position: absolute; opacity: 0; pointer-events: none; }
+.concepts-toggle-label { display: inline-block; border: 1px solid #555; padding: 4px 10px; cursor: pointer; font-size: 13px; background: #eee; }
+.concepts-toggle:checked + header .concepts-toggle-label { background: #555; color: #fff; }
+.concepts-toggle:focus-visible + header .concepts-toggle-label { outline: 2px solid #222; outline-offset: 2px; }
+
+.concepts-comparison { border-collapse: collapse; width: 100%; min-width: 900px; font-size: 13px; }
+.concepts-comparison th,
+.concepts-comparison td { border: 1px solid #999; padding: 8px; text-align: left; vertical-align: top; }
+.concepts-comparison thead th { background: #e5e5e5; }
+.concepts-comparison tbody th { background: #f2f2f2; width: 140px; }
+
+.concepts-concept { border-top: 2px solid #222; margin-top: 40px; }
+.concepts-kind { font-size: 12px; font-weight: normal; border: 1px solid #666; padding: 1px 6px; margin-left: 8px; color: #444; }
+.concepts-card { border: 1px solid #999; background: #f4f4f4; padding: 6px 12px; margin: 8px 0 16px; font-size: 14px; }
+.concepts-card p { margin: 4px 0; }
+
+/* Main frames stack full width. Thumbnails sit in a row below. */
+.concepts-stack { display: grid; gap: 24px; }
+.concepts-shot { margin: 0; }
+.concepts-shot figcaption { font-size: 13px; font-weight: bold; margin-bottom: 4px; }
+.concepts-thumbs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.concepts-thumb { margin: 0; }
+.concepts-thumb figcaption { font-size: 12px; color: #555; margin-top: 4px; }
+
+/* The frame scales as one picture: everything inside is in em, font size comes from the width. */
+.concepts-screen { container-type: inline-size; }
+.concepts-frame {
+  font-size: 1.25cqw;
+  line-height: 1.25;
+  aspect-ratio: 16 / 10;
+  display: grid;
+  grid-template-columns: 12% 1fr;
+  grid-template-rows: 7% 1fr;
+  grid-template-areas: "header header" "nav content";
+  position: relative;
+  border: 2px solid #444;
+  background: #fff;
+  overflow: hidden;
+}
+.concepts-frame-nonav { grid-template-columns: 1fr; grid-template-areas: "header" "content"; }
+
+.concepts-header { grid-area: header; background: #ddd; border-bottom: 1px solid #888; position: relative; padding: 0 1em; display: flex; align-items: center; gap: 1em; }
+.concepts-draft { margin-left: auto; font-size: 0.85em; color: #444; white-space: nowrap; }
+.concepts-nav { grid-area: nav; background: #eaeaea; border-right: 1px solid #888; padding: 1em 0.8em; position: relative; }
+.concepts-content { grid-area: content; position: relative; overflow: hidden; min-height: 0; }
+
+/* The overlay shares the content cell and sits on top of it. */
+.concepts-overlay { grid-area: content; position: relative; z-index: 2; display: grid; padding: 0.8em; pointer-events: none; min-height: 0; }
+.concepts-dim { background: rgba(0, 0, 0, 0.35); }
+.concepts-overlay-item { background: #fff; max-height: 100%; overflow: hidden; border: 1px solid #333; padding: 0.4em; min-height: 0; }
+.concepts-at-center { place-items: center; }
+.concepts-at-center .concepts-overlay-item { width: 82%; }
+.concepts-at-right { place-items: stretch end; padding: 0; }
+.concepts-at-right .concepts-overlay-item { width: 62%; border-width: 0 0 0 2px; }
+
+/* Background content: grey bars, no text. */
+.concepts-bar { height: 1em; background: #ccc; margin-bottom: 0.6em; }
+.concepts-bar-narrow { width: 60%; }
+.concepts-bar-inline { display: inline-block; width: 3em; height: 0.8em; margin: 0; vertical-align: middle; }
+.concepts-w20 { width: 20%; margin: 0; }
+.concepts-w10 { width: 10%; margin: 0; }
+
+/* Blocks: one line of text at most, cut with "...". Labels hidden by default, above the block when shown. */
+.concepts-block { position: relative; margin-bottom: 0.4em; min-width: 0; }
+.concepts-box { border: 1px solid #888; background: #f0f0f0; padding: 0.3em 0.45em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.concepts-box .concepts-box { background: #fff; }
+.concepts-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0.1em 0; }
+.concepts-tags { display: flex; gap: 0.4em; }
+.concepts-tag { border: 1px solid #777; background: #fff; padding: 0 0.4em; font-size: 0.9em; white-space: nowrap; }
+.concepts-tag-strong { background: #555; border-color: #555; color: #fff; }
+.concepts-primary { background: #555 !important; color: #fff; }
+.concepts-disabled { background: #ddd !important; color: #888; border-style: dashed; }
+.concepts-actions { display: flex; gap: 0.5em; }
+.concepts-actions .concepts-block { margin-bottom: 0; min-width: 8em; }
+
+.concepts-label { display: none; position: absolute; left: 0; top: -1.15em; font-family: monospace; font-size: 0.7em; line-height: 1; color: #444; background: #fff; padding: 0 2px; white-space: nowrap; z-index: 5; }
+.concepts-toggle:checked ~ section .concepts-shot .concepts-label { display: block; }
+/* The header sits at the frame edge, so its label goes inside it. */
+.concepts-header > .concepts-label { top: 0.2em; left: 0.3em; }
+.concepts-toggle:checked ~ section .concepts-shot .concepts-block { margin-top: 1.1em; }
+.concepts-toggle:checked ~ section .concepts-shot .concepts-header,
+.concepts-toggle:checked ~ section .concepts-shot .concepts-nav { padding-top: 1.6em; }
+
+/* Concept A: ranked table. */
+.concepts-table { padding: 0; background: #fff; }
+.concepts-row { display: grid; gap: 0.6em; padding: 0.3em 0.6em; border-bottom: 1px solid #ddd; align-items: center; }
+.concepts-row-head { background: #e5e5e5; font-weight: bold; }
+.concepts-grid-full { grid-template-columns: 6em 5.5em minmax(0, 1fr) 5em 9em 8em 4.5em 7.5em; }
+.concepts-grid-compact { grid-template-columns: 6em 5em 4.5em; }
+.concepts-cell { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.concepts-row-selected { background: #ddd; font-weight: bold; }
+.concepts-row-done { color: #999; background: #f4f4f4; }
+.concepts-panel { height: 100%; }
+
+/* Concept B: lanes and a full-screen detail. */
+.concepts-lanes { display: grid; grid-template-columns: 40% 1fr; grid-template-rows: 1fr auto; gap: 0.8em; padding: 0.8em; height: 100%; }
+.concepts-lane { min-width: 0; }
+.concepts-lane-row { display: flex; align-items: center; gap: 0.5em; border: 1px solid #aaa; padding: 0.25em 0.4em; margin-bottom: 0.3em; background: #fff; min-width: 0; }
+.concepts-lane-row .concepts-block { margin: 0; }
+.concepts-lane-text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.concepts-done { grid-column: 1 / -1; }
+.concepts-done-bars { display: flex; gap: 0.5em; }
+.concepts-done-bars .concepts-bar { width: 12em; margin: 0.2em 0 0; }
+.concepts-modal-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; }
+.concepts-modal-cols > div { min-width: 0; }
+
+/* Concept C: rail and case file. */
+.concepts-split { display: grid; grid-template-columns: 22% 1fr; gap: 0.8em; padding: 0.8em; height: 100%; }
+.concepts-rail { background: #fff; min-width: 0; }
+.concepts-rail-item { border: 1px solid #aaa; padding: 0.3em 0.4em; margin-bottom: 0.3em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: #fff; }
+.concepts-case { background: #fff; min-width: 0; }
+.concepts-case-head { display: flex; gap: 0.6em; align-items: center; margin: 0.3em 0; }
+.concepts-case-head .concepts-block { margin: 0; }
+.concepts-case-cols { display: grid; grid-template-columns: 38% 1fr; gap: 0.8em; margin: 0.4em 0; }
+.concepts-case-cols > div { min-width: 0; }
+
+/* Thumbnails: same frame at small size, text hidden, no labels. */
+.concepts-thumbs .concepts-box,
+.concepts-thumbs .concepts-line,
+.concepts-thumbs .concepts-draft,
+.concepts-thumbs .concepts-cell,
+.concepts-thumbs .concepts-lane-text,
+.concepts-thumbs .concepts-rail-item,
+.concepts-thumbs .concepts-tag { color: transparent; }
+.concepts-thumbs .concepts-primary { color: transparent; }
+.concepts-thumbs .concepts-tag-strong { background: #555; }
+.concepts-thumbs .concepts-label { display: none !important; }
+.concepts-thumbs .concepts-block { margin-top: 0 !important; }
+
+@media (max-width: 760px) {
+  .concepts-thumbs { grid-template-columns: 1fr 1fr; }
+}
+
+/* Concept pages: question and answer header, back link. */
+.concepts-back { margin: 0 0 8px; font-size: 13px; }
+.concepts-qa { min-width: 0; }
+.concepts-qa th { width: 38%; background: #f2f2f2; font-weight: normal; }
+
+/* Links: the Tailwind reset removes link styling, so restore it. Greyscale: underline, no color. */
+.concepts-page a { color: #222; text-decoration: underline; text-underline-offset: 3px; font-weight: bold; cursor: pointer; }
+.concepts-page a:hover { background: #ddd; }
+.concepts-page a:focus-visible { outline: 2px solid #222; outline-offset: 2px; }
