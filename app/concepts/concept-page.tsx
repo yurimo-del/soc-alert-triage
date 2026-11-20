@@ -59,7 +59,7 @@ export function ConceptPage({ id }: { id: "A" | "B" | "C" }) {
       </section>
 
       <section className="concepts-concept">
-        <h2><h>Screens</h></h2>
+        <h2>Screens</h2>
         <Screens />
       </section>
     </main>
