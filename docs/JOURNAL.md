@@ -208,7 +208,7 @@ My corrections to the concepts:
 
 My corrections today:
 - The AI asked me to approve a plan before it changed anything. Its read-only audit found real conflicts. I decided each one.
-- The file was called "rubric". I mix it up with a company name. I renamed it to "review criteria".
+- The file was called "review criteria".
 - I looked at a public skills pack. The license allows internal use only. I decided we write our own skills and only take ideas, marked "inspired by".
 - The AI said ADR-08 was not in git. I checked, and it was there. The AI had read a web summary, not the repo.
 - The plan said "use critique as is". ADR-08 had already dropped it. I kept ADR-08.
