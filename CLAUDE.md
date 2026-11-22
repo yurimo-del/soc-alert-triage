@@ -40,7 +40,54 @@ The repository is part of the owner's portfolio. Keep it clean, documented and l
 | `data/alerts/` | Synthetic alerts and the eval set |
 | `data/fallback/` | Recorded AI responses, one per alert id |
 | `scripts/` | Eval runner and other dev scripts |
-| `docs/` | One-pager, DECISIONS, JOURNAL, HANDOVER |
+| `docs/` | One-pager, DECISIONS, JOURNAL, HANDOVER, SPRINT_PLAN, REQUIREMENTS, `prompts/` |
+| `core/` | Project frame: brief, primary user, design system, constraints, evals guidelines, risk profile, review criteria |
+| `concepts/` | Index and notes for the wireframe concepts (the pages are in `app/concepts/`) |
+| `memory/` | Project notes: feedback and skill lessons. Repo `memory/` is project notes, not Claude's memory |
+| `framework/` | Reusable layer: workflows, templates, quality gates, skills registry, changelog |
+| `.claude/` | Reusable layer: agents, skills, commands, settings |
+
+## Framework and project boundary
+
+This repo has two layers:
+- **Framework (reusable):** `.claude/` (agents, skills, commands) and `framework/` (workflows, templates, quality gates, skills registry, changelog).
+- **Project (this product only):** `core/`, `data/`, `concepts/`, `app/`, `docs/`, `memory/`.
+
+**Rule:** nothing in `.claude/` or `framework/` may name this product, its domain, its users or its design system. Skills refer to `core/` instead.
+
+## Read order for any design task
+
+1. All of `core/`. Stop and ask only if the task needs a file or field marked `[MISSING]`. Otherwise continue and list the gaps in your report.
+2. `framework/workflows/prd-to-handover.md` and the step you are on.
+3. `framework/quality/gates.md` for that step's exit criteria.
+
+Never guess a value that is marked `[MISSING]`.
+
+## Where things live (mapping to the framework)
+
+| Framework concept | In this repo |
+|---|---|
+| Core | `core/` |
+| Brain (data, research) | `data/`, `docs/one-pager.md`, `docs/REQUIREMENTS.md` |
+| Outputs | `concepts/`, `app/`, `docs/HANDOVER.md` |
+| Review criteria | `core/review-criteria.md` (template: `framework/templates/review-criteria.md`) |
+| Plan | `docs/SPRINT_PLAN.md` |
+| Prompts used for key steps | `docs/prompts/` |
+| Memory: decisions | `docs/DECISIONS.md` |
+| Memory: feedback | `memory/feedback.md` |
+| Memory: skill lessons | `memory/skill-lessons.md` |
+| Story of the work | `docs/JOURNAL.md` (story per important chunk, not a log) |
+
+## Step numbering
+
+The framework numbering wins (`framework/workflows/prd-to-handover.md`). Old Step 2 = framework step 3 (concepts and wireframes). Old journal entries and prompts are not rewritten.
+
+## Skills
+
+- Skills live flat in `.claude/skills/<skill-name>/SKILL.md`.
+- Every skill starts with the header from `framework/templates/skill-header.md` and is listed in `framework/skills-registry.md`.
+- We never copy text from third-party skills into this repo. We take the idea and write our own skill. The header and the registry record type own and the source as "inspired by" with a link. Type external is only for skills installed as is, outside this repo, and we never edit them.
+- Every change to a skill: bump its version in the registry and log it in `framework/CHANGELOG.md`.
 
 ## AI layer rules
 

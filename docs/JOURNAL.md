@@ -197,3 +197,15 @@ My corrections to the concepts:
 **Lesson:** Most of my corrections were one rule: what belongs together must sit together, in the same order. Sort order, column order, detail order. An action sits next to the status it changes. These are general rules, so they go into the skill, not only into one concept. Today the skill got the first one: one page per concept. The rest go in with concept C v2.
 
 **AI note:** The agent described opening a panel as a review. It was not. The AI describes the flow it wants, not the flow it drew. Count the clicks. Also, the skill's self-check passed all its rules and found none of my corrections. It checks how the screen is drawn, not if the logic is right.
+
+## Day 6: Framework and project split
+
+What: I split the repo into a reusable framework (`.claude/` and `framework/`) and the project (`core/`, `data/`, `concepts/`, `app/`, `docs/`, `memory/`). The framework has the workflow, quality gates, templates, a skills registry and a changelog. `core/` holds the project frame, with every gap marked `[MISSING]`.
+
+Why: The sprint plan says the same process should run on the next product. That only works if nothing in the framework names this product, its users or its design system. The alternative was to keep everything in one pile and clean it up at the end.
+
+How: I wrote the rule "nothing in `.claude/` or `framework/` names the product" into CLAUDE.md. I filled `core/` only from what the repo already says. I removed the design-system name from the wireframe skill and pointed it to `core/design-system.md`. I renamed "rubric" to "review criteria". I wrote a rule that we never copy third-party skill text, only the idea (ADR-09).
+
+Lesson: A prototype becomes a product process when the reusable part and the project part have a clear border, and when gaps are written down instead of filled with guesses.
+
+AI note: Before the merge I asked the agent for a read-only audit. It found the design-system name inside the skill, a review-rubric path that did not match, and a gate that said 2 directions while the skill made 3. I decided each one. The fixes are in framework/CHANGELOG.md.

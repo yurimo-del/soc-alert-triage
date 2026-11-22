@@ -92,4 +92,17 @@ Expected labels and review rules are draft v0, AI-assisted, pending security exp
   - ADR-04: Figma becomes optional.
   - ADR-05 stays: the developer test is the second core proof.
   - The case study must state that requirements and labels are simulated.
-  
+
+## ADR-09: Own skills only, no third-party skill text (2026-11-22)
+
+- **Status:** Accepted
+- **Context:** The framework needs a clear rule for where a skill comes from. Copying text from third-party skills raises licence and trust questions, and a changed copy is hard to keep up to date. ADR-08 said the wireframe and prototype steps use existing skills and tools. The wireframe skill is now written here, and the first version has been tuned on this project.
+- **Decision:**
+  - We never copy text from third-party skills into this repo. We take the idea and write our own skill. The header and the registry record type own and the source as "inspired by" with a link. Type external is only for skills installed as is, outside this repo, and we never edit them.
+  - The type "adapted" (a changed copy) is removed.
+  - The judgment-loop skill from ADR-08 is now the review skill (framework step 4A). It prepares material for the designer's judgment and does not judge. Each iteration is measured by the number of designer corrections and time spent, as in ADR-08.
+  - The critique skill is dropped, as ADR-08 decided. The registry marks it dropped.
+- **Consequences:**
+  - ADR-08 stays as history. Where it says "wireframe and prototype use existing skills", the wireframe skill is now own (version 0.2).
+  - Every skill in `.claude/skills/` has an Origin header and a registry row, and every change is logged in `framework/CHANGELOG.md`.
+  - Skills installed from outside are never stored in `.claude/` and never edited.

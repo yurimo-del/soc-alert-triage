@@ -38,4 +38,4 @@ A design-led prototype that explores how an AI copilot can help a SOC team triag
 
 ## Status
 
-Week 1 of 3: product foundation.
+Week 2 of 3: framework and concept review.
