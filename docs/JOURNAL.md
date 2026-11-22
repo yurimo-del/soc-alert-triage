@@ -200,12 +200,19 @@ My corrections to the concepts:
 
 ## Day 6: Framework and project split
 
-What: I split the repo into a reusable framework (`.claude/` and `framework/`) and the project (`core/`, `data/`, `concepts/`, `app/`, `docs/`, `memory/`). The framework has the workflow, quality gates, templates, a skills registry and a changelog. `core/` holds the project frame, with every gap marked `[MISSING]`.
+**What:** I split the repo into a reusable framework (`.claude/` and `framework/`) and the project (`core/`, `data/`, `concepts/`, `app/`, `docs/`, `memory/`). The framework has the workflow, quality gates, templates, a skills registry and a changelog. `core/` holds the project frame, with every gap marked `[MISSING]`.
 
-Why: The sprint plan says the same process should run on the next product. That only works if nothing in the framework names this product, its users or its design system. The alternative was to keep everything in one pile and clean it up at the end.
+**Why:** I want the same process to work on the next product: PRD in, validated prototype for handover out. That only works if nothing in the framework names this product, its users or its design system.
 
-How: I wrote the rule "nothing in `.claude/` or `framework/` names the product" into CLAUDE.md. I filled `core/` only from what the repo already says. I removed the design-system name from the wireframe skill and pointed it to `core/design-system.md`. I renamed "rubric" to "review criteria". I wrote a rule that we never copy third-party skill text, only the idea (ADR-09).
+**How:** I wrote the rule "nothing in `.claude/` or `framework/` names the product" into CLAUDE.md. The agent filled `core/` only from what the repo already says. The wireframe skill now points to `core/design-system.md` instead of naming a design system. I added a rule that we never copy third-party skill text, only the idea (ADR-09).
 
-Lesson: A prototype becomes a product process when the reusable part and the project part have a clear border, and when gaps are written down instead of filled with guesses.
+My corrections today:
+- The AI asked me to approve a plan before it changed anything. Its read-only audit found real conflicts. I decided each one.
+- The file was called "rubric". I mix it up with a company name. I renamed it to "review criteria".
+- I looked at a public skills pack. The license allows internal use only. I decided we write our own skills and only take ideas, marked "inspired by".
+- The AI said ADR-08 was not in git. I checked, and it was there. The AI had read a web summary, not the repo.
+- The plan said "use critique as is". ADR-08 had already dropped it. I kept ADR-08.
 
-AI note: Before the merge I asked the agent for a read-only audit. It found the design-system name inside the skill, a review-rubric path that did not match, and a gate that said 2 directions while the skill made 3. I decided each one. The fixes are in framework/CHANGELOG.md.
+**Lesson:** A prototype becomes a product process when the reusable part and the project part have a clear border, and when gaps are written down instead of filled with guesses.
+
+**AI note:** Before the merge I asked the agent for a read-only audit. It found the design-system name inside the skill, a review criteria path that did not match, and a gate that said 2 directions while the skill made 3. I decided each one. The fixes are in framework/CHANGELOG.md.
