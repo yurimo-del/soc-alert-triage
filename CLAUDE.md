@@ -40,7 +40,7 @@ The repository is part of the owner's portfolio. Keep it clean, documented and l
 | `data/alerts/` | Synthetic alerts and the eval set |
 | `data/fallback/` | Recorded AI responses, one per alert id |
 | `scripts/` | Eval runner and other dev scripts |
-| `docs/` | One-pager, DECISIONS, JOURNAL, HANDOVER, SPRINT_PLAN, REQUIREMENTS, `prompts/` |
+| `docs/` | One-pager, DECISIONS, JOURNAL, HANDOVER, REQUIREMENTS, `prompts/` |
 | `core/` | Project frame: brief, primary user, design system, constraints, evals guidelines, risk profile, review criteria |
 | `concepts/` | Index and notes for the wireframe concepts (the pages are in `app/concepts/`) |
 | `memory/` | Project notes: feedback and skill lessons. Repo `memory/` is project notes, not Claude's memory |
@@ -71,7 +71,7 @@ Never guess a value that is marked `[MISSING]`.
 | Brain (data, research) | `data/`, `docs/one-pager.md`, `docs/REQUIREMENTS.md` |
 | Outputs | `concepts/`, `app/`, `docs/HANDOVER.md` |
 | Review criteria | `core/review-criteria.md` (template: `framework/templates/review-criteria.md`) |
-| Plan | `docs/SPRINT_PLAN.md` |
+| Plan | `docs/DECISIONS.md` (ADR-10) |
 | Prompts used for key steps | `docs/prompts/` |
 | Memory: decisions | `docs/DECISIONS.md` |
 | Memory: feedback | `memory/feedback.md` |

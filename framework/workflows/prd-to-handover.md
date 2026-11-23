@@ -6,13 +6,14 @@
 
 | # | Step | Agent / skill | Output | Gate: who decides what |
 |---|---|---|---|---|
+| 0 | Read the existing product | Claude Code, manual walkthrough | layer map of 1-2 areas: navigation, layout, flows, business processes, data points, behavior | Designer: which areas and layers matter |
 | 1 | Requirements review | requirements-review skill (planned; manual in v0.1) | open questions on the PRD | Designer: which gaps matter |
 | 2 | Core | templates in `framework/templates/core/` | filled `core/` | Designer + stakeholders: the frame every later decision uses |
 | 3 | Concepts and wireframes | wireframe skill | 2-3 distinct directions | none, goes straight to review |
 | 4 | Conceptual review | review skill (designer-tuned) | review per direction, against `core/review-criteria.md` | A: Designer accepts, rejects or redirects. B: real users choose the main direction (mode from risk profile). Loop to step 3 until a direction passes |
 | 5 | Interactive prototype | Claude Code | working prototype on the core design system, deployed preview | none, goes straight to validation |
 | 6 | Validation | none (people) | findings with severity | Real users on real tasks (mode from risk profile). Findings compared with the step 4 review |
-| 7 | Handover | handover skill | handover package for engineering | Developer builds from the package. Every question is a gap to fix |
+| 7 | UX rules skill | UX rules skill (planned) | The product's UX packaged so a developer and their AI agent can build a new screen without a designer for each page | Done when a developer built a new screen with it and the findings are logged. Every question or deviation is a gap to fix |
 
 ## User validation modes (set per gate in `core/risk-profile.md`)
 
@@ -32,7 +33,7 @@
 
 - Step 4: compare the review skill's verdict with the designer's blind review and with the users' choice.
 - Step 6: compare user findings with what the step 4 review predicted. A finding the skill missed is the strongest tuning signal.
-- Step 7: every developer question is a gap in the handover skill.
+- Step 7: every developer question or deviation is a gap in the UX rules skill.
 - Log each gap in `memory/skill-lessons.md`, fix the skill, bump its version in `framework/skills-registry.md`.
 
 ## Memory

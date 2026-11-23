@@ -12,3 +12,7 @@
 - Renamed the review rubric to review criteria (`templates/review-criteria.md`, `core/review-criteria.md`).
 - Core rule softened: read all of `core/`, and stop only if the task needs something marked `[MISSING]`.
 - `quality/gates.md`: gate minimum is 2 directions, the wireframe skill makes 3 by default.
+
+## v0.3 (2026-11-23)
+- Workflow: added step 0, read the existing product (layer map of 1-2 areas). Step 7 is now the UX rules skill, done when a developer builds a new screen with it and the findings are logged. File name unchanged.
+- Review criteria must judge both new concepts and existing flows (ADR-10). No skill versions changed.

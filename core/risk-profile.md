@@ -17,3 +17,5 @@ Draft v0, AI-assisted, pending security expert review.
 | 6 Prototype validation | Full session | A third security expert with fresh eyes, ideally someone who triages alerts daily | Trust in AI output only shows on a working prototype with realistic data |
 
 Fallback if only one expert is available: the same person does a quick check at 4B and a full session at 6, or one combined session. The reduced validation is recorded as a risk in the handover package.
+
+**Gate 6 is reduced for the SOC app (conscious decision, ADR-10).** Full prototype validation is not run in the form planned above. Reason: this is a learning prototype, and the proof now comes from the developer test (ADR-10). The gate 6 row above is the original plan.

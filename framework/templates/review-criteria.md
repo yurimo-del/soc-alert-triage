@@ -1,4 +1,6 @@
-# Review criteria: what a good concept means
+# Review criteria: what makes a concept or an existing flow good
+
+The same criteria judge new concepts and flows that already exist in a product.
 
 Written by the designer. This file is the designer's expertise in a form a skill can apply.
 Copy it to `core/review-criteria.md` and fill in 5-7 criteria for the project.

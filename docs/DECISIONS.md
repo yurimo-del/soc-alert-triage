@@ -106,3 +106,21 @@ Expected labels and review rules are draft v0, AI-assisted, pending security exp
   - ADR-08 stays as history. Where it says "wireframe and prototype use existing skills", the wireframe skill is now own (version 0.2).
   - Every skill in `.claude/skills/` has an Origin header and a registry row, and every change is logged in `framework/CHANGELOG.md`.
   - Skills installed from outside are never stored in `.claude/` and never edited.
+
+## ADR-10: Input changes from a new idea to an existing product (2026-11-23)
+
+- **Status:** Accepted
+- **Context:** On day 7 I revised the sprint plan. I want to widen my expertise: not only starting from a new idea, but also working with an existing product. In a real company the entry point is usually the product that already exists. The sprint now focuses on the process itself: how to read an existing product layer by layer, let a team experience concept-level alternatives, and package the product's UX rules into a skill that a developer and their AI agent can build with.
+- **Decision:**
+  - Skills stay, they are the method. The SOC app becomes the training ground.
+  - New step 0: read the existing product layer by layer (navigation, layout, flows, business processes, data points, behavior).
+  - Step 7 becomes a UX rules skill instead of a handover package.
+  - Proof: a developer builds a NEW screen with the UX rules skill and their own AI agent. We log questions, deviations and rework.
+  - Last sprint week: the same method on an existing product of a target company. Private, within trial terms, no invented numbers, no products of former employers.
+  - Gate 4B stays. Gate 6 is reduced for the SOC app (see `core/risk-profile.md`).
+  - Review criteria must judge both new concepts and existing flows, including what works today and should stay.
+  - Time and number of edits per iteration are an internal quality signal for skills, not a speed claim.
+  - Stopped: SOC app polishing, journal on the portfolio homepage, "See my journey live" button.
+- **Consequences:**
+  - The review skill must work on a product we did not build.
+  - The framework must stay free of SOC facts.

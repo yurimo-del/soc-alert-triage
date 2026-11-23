@@ -208,7 +208,6 @@ My corrections to the concepts:
 
 My corrections today:
 - The AI asked me to approve a plan before it changed anything. Its read-only audit found real conflicts. I decided each one.
-- The file was called "review criteria".
 - I looked at a public skills pack. The license allows internal use only. I decided we write our own skills and only take ideas, marked "inspired by".
 - The AI said ADR-08 was not in git. I checked, and it was there. The AI had read a web summary, not the repo.
 - The plan said "use critique as is". ADR-08 had already dropped it. I kept ADR-08.
@@ -216,3 +215,15 @@ My corrections today:
 **Lesson:** A prototype becomes a product process when the reusable part and the project part have a clear border, and when gaps are written down instead of filled with guesses.
 
 **AI note:** Before the merge I asked the agent for a read-only audit. It found the design-system name inside the skill, a review criteria path that did not match, and a gate that said 2 directions while the skill made 3. I decided each one. The fixes are in framework/CHANGELOG.md.
+
+## Day 7: The input changes from a new idea to an existing product
+
+**What:** I changed what the framework starts from and what it ends with. It now starts by reading an existing product layer by layer (step 0) and ends with a UX rules skill (step 7) instead of a handover package. Recorded as ADR-10.
+
+**Why:** A set of skills is technique, not expertise. Every designer says "idea, concepts, validation". In a real company you never start from zero. The design lead's value is to read the product the team already built, let them experience real alternatives, and package the UX rules so any developer and their AI agent can build a new screen without waiting for a designer.
+
+**How:** The skills stay, they are the method. The SOC app becomes the training ground where they were tuned. The proof moves from a full prototype validation (gate 6, now reduced on purpose) to a developer test: a developer builds a new screen with the UX rules skill and their own agent, and I log where they get stuck.
+
+**Lesson:** Speed with AI is not the story. The story is the quality of decisions, and whether others can build in one UX without me.
+
+**AI note:** I asked the agent to list every place that still described the old step 7, not to fix them. The list showed that the change touched gates, the skills registry, the README and older ADRs. A rename in one file is never only one file.
