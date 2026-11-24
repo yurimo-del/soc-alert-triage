@@ -2,13 +2,14 @@ import Link from "next/link";
 import { ConceptA } from "./concept-a";
 import { ConceptB } from "./concept-b";
 import { ConceptC } from "./concept-c";
+import { ConceptC2 } from "./concept-c2";
 import { CONCEPTS, QUESTIONS } from "./concepts-content";
 import "./concepts.css";
 
-const SCREENS = { A: ConceptA, B: ConceptB, C: ConceptC };
+const SCREENS = { A: ConceptA, B: ConceptB, C: ConceptC, C2: ConceptC2 };
 
 // One concept on its own page, so it can be linked alone. The screens are unchanged.
-export function ConceptPage({ id }: { id: "A" | "B" | "C" }) {
+export function ConceptPage({ id }: { id: "A" | "B" | "C" | "C2" }) {
   const c = CONCEPTS.find((x) => x.id === id)!;
   const Screens = SCREENS[id];
   return (
@@ -19,7 +20,7 @@ export function ConceptPage({ id }: { id: "A" | "B" | "C" }) {
           <Link href="/concepts">All concepts</Link>
         </p>
         <h1>
-          Concept {c.id}: {c.name} <span className="concepts-kind">{c.kind}</span>
+          Concept {c.label}: {c.name} <span className="concepts-kind">{c.kind}</span>
         </h1>
         <p className="concepts-status">
           Draft wireframes. Greyscale. Placeholders. The AI is drawn as always right.

@@ -8,8 +8,8 @@ allowed-tools: Read Write Edit Glob Grep Bash(npm run build) Bash(npm run lint)
 ## Origin
 - Type: own
 - Inspired by: none
-- Version: 0.2
-- Tuned on: one project, 3 concept runs (2026-11)
+- Version: 0.3
+- Tuned on: one project, 3 concept runs and 1 revision (2026-11)
 
 # Wireframe concepts
 
@@ -39,12 +39,20 @@ Turn a brief into one page that compares 3 or more complete concepts. The page i
 
 - **One screen frame per concept, fixed 16:10.** Use `aspect-ratio: 16 / 10` and CSS grid zones: header, nav, content, overlay. The overlay is a grid item in the same cell as the content and sits on top of it (higher `z-index`), never under it. Size everything inside the frame in `em` and set the frame font size from a container query unit (`cqw`), so the frame scales as one picture.
 - **Background content is grey bars, never text lines.** List rows, nav items and tables behind the main element are plain grey bars.
-- **States are small thumbnails next to the main frame**, not repeated full screens. Use the same frame component at small size, with a one-word caption underneath. Text inside thumbnails is hidden.
+- **States are small thumbnails next to the main frame**, not repeated full screens. Use the same frame component at small size, with a one-word caption underneath. Text inside thumbnails is hidden. Exception: a state whose point is changed text (for example a new status word after an action) is drawn as a full-size frame, at most 2 per concept.
 - **Pattern labels are hidden by default.** One toggle at the top of the page shows them. Use a CSS-only toggle (a checkbox and `:has()`), so the page stays a server component. Labels never show inside thumbnails.
 - **Max 1 line of text per block.** One short line, no wrapping. Everything else is a grey bar or a box.
+- **Column order follows sort order.** If a list is sorted by A, then B, then C, put columns A, B, C side by side in that order.
+- **Detail uses the list's field order.** The shared fields come first, in the same order. Detail-only fields follow.
+- **An action and the status it changes sit together, as one block.** The rule does not fix the place: top or end. Put the block after what the user must read to decide.
+- **Every action changes the item's visible state.** Draw the state after the action (see the full-size exception for states above).
+- **Describe interactions honestly.** Count the clicks. Opening a panel is not a review, and a tick is a statement, not proof of a check.
+- **A pop-up or overlay detail is one column, top-down,** easy to scan. Not two columns.
+- **A link must look like a link.** Underline it and keep it distinct from plain text, in greyscale too. A grey bar is never a link.
+- **A revision of a concept** gets its own page and says what changed from its base. It is exempt from the 3-concept minimum and from the blur test against its base. It is not exempt from the blur test against the other concepts.
 
 ## Self-check (required)
-After the build passes, do not report yet. Ask the user for a screenshot of the page (this is the one allowed exception to "at most one question"). Compare the screenshot to the rules above, one by one: fixed 16:10 frames, overlay on top, grey bars in the background, thumbnails, labels hidden, one line per block, concepts that differ at a glance. Fix what breaks. Then report, and say which rules you checked.
+After the build passes, do not report yet. Ask the user for a screenshot of the page (this is the one allowed exception to "at most one question"). Compare the screenshot to the rules above, one by one: fixed 16:10 frames, overlay on top, grey bars in the background, thumbnails, labels hidden, one line per block, concepts that differ at a glance, column and field order, action next to its status, state after each action, honest click counts, one-column overlays, links that look like links. Fix what breaks. Then report, and say which rules you checked.
 
 ## Page layout
 1. Title and a one-line status: "Draft wireframes. Greyscale. Placeholders."

@@ -5,10 +5,10 @@ import "./concepts.css";
 
 export const metadata: Metadata = {
   title: "Wireframe concepts | SOC Alert Triage",
-  description: "Step 2. Index of three greyscale wireframe concepts for the alert list and alert detail.",
+  description: "Step 2. Index of greyscale wireframe concepts for the alert list and alert detail.",
 };
 
-// Index page: the questions, the comparison and a link to each concept. Screens live on /concepts/a, /b, /c.
+// Index page: the questions, the comparison and a link to each concept. Screens live on /concepts/a, /b, /c and /c-v2.
 export default function ConceptsIndexPage() {
   return (
     <main className="concepts-page">
@@ -25,7 +25,7 @@ export default function ConceptsIndexPage() {
           {CONCEPTS.map((c) => (
             <li key={c.id}>
               <Link href={`/concepts/${c.slug}`}>
-                Concept {c.id}: {c.name}
+                Concept {c.label}: {c.name}
               </Link>{" "}
               <span className="concepts-kind">{c.kind}</span>. {c.idea}
             </li>
@@ -64,7 +64,7 @@ export default function ConceptsIndexPage() {
                 <tr key={c.id}>
                   <th>
                     <Link href={`/concepts/${c.slug}`}>
-                      {c.id}. {c.name}
+                      {c.label}. {c.name}
                     </Link>
                     <br />
                     <em>{c.kind}</em>

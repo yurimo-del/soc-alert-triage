@@ -9,6 +9,7 @@ export const QUESTIONS = [
 export const CONCEPTS = [
   {
     id: "A",
+    label: "A",
     slug: "a",
     name: "Ranked queue",
     kind: "conservative",
@@ -24,6 +25,7 @@ export const CONCEPTS = [
   },
   {
     id: "B",
+    label: "B",
     slug: "b",
     name: "Lanes",
     kind: "novel",
@@ -39,6 +41,7 @@ export const CONCEPTS = [
   },
   {
     id: "C",
+    label: "C",
     slug: "c",
     name: "Case file, one at a time",
     kind: "novel",
@@ -51,6 +54,22 @@ export const CONCEPTS = [
     ],
     tradeoff: "Good: focus, payload next to the reasoning. Costs: no overview of the queue, fixed order.",
     assumes: "Works the queue in order and trusts the ranking.",
+  },
+  {
+    id: "C2",
+    label: "C v2",
+    slug: "c-v2",
+    name: "Case file with lanes",
+    kind: "novel",
+    idea: "A revision of C. A lane switch and a list on the left, one case file on the right. The decision block comes last.",
+    answers: [
+      "The switch. Quick confirm: 2 clicks (select, Confirm). Needs review: 3 clicks (select, tick the statement \"I reviewed the evidence\", Confirm). The tick is a statement, not proof of a review.",
+      "The switch picks the lane. Inside a lane: severity, then oldest.",
+      "The card stays in its lane, greyed, with the new status. The decision block shows the same status. No Undo and no next step after Reject.",
+      "Card and detail share one order: status, severity, time, id: title. The detail continues with source, summary, evidence, action and raw fields.",
+    ],
+    tradeoff: "Good: effort is split by lane, the detail reads top-down and the decision comes after the evidence. Costs: the tick can be set without reading, and the other lane is hidden until the switch is used.",
+    assumes: "Clears the Quick confirm lane first, then reads each Needs review detail top-down.",
   },
 ] as const;
 

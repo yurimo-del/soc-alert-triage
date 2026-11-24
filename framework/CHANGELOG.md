@@ -15,4 +15,7 @@
 
 ## v0.3 (2026-11-23)
 - Workflow: added step 0, read the existing product (layer map of 1-2 areas). Step 7 is now the UX rules skill, done when a developer builds a new screen with it and the findings are logged. File name unchanged.
-- Review criteria must judge both new concepts and existing flows (ADR-10). No skill versions changed.
+- Review criteria must judge both new concepts and existing flows (ADR-10).
+
+## v0.4 (2026-11-24)
+- Wireframe skill 0.3: new rules for column order, detail field order, action and status as one block, state after every action, honest click counts, one-column overlays and links that look like links. Full-size exception for after-action states (max 2 per concept). A revision of a concept gets its own page and is exempt from the 3-concept minimum and the blur test against its base.

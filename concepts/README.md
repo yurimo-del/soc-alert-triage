@@ -8,6 +8,7 @@ Pages (run `npm run dev`, then open):
 - [Concept A: Ranked queue](http://localhost:3000/concepts/a): `/concepts/a`
 - [Concept B: Lanes](http://localhost:3000/concepts/b): `/concepts/b`
 - [Concept C: Case file, one at a time](http://localhost:3000/concepts/c): `/concepts/c`
+- [Concept C v2: Case file with lanes](http://localhost:3000/concepts/c-v2): `/concepts/c-v2` (a revision of C)
 
 Each concept page starts with the design questions and its own answers, then the idea, trade-off, analyst assumption and screens. A toggle at the top of each page shows the Carbon pattern labels.
 
@@ -33,6 +34,7 @@ Design questions are section 8 of [`docs/REQUIREMENTS.md`](../docs/REQUIREMENTS.
 | [A. Ranked queue](#a-ranked-queue) ([page](http://localhost:3000/concepts/a)) | One sorted table. Detail opens in a side panel. | conservative |
 | [B. Lanes](#b-lanes) ([page](http://localhost:3000/concepts/b)) | The list is split into lanes by how much attention an alert needs. | novel |
 | [C. Case file, one at a time](#c-case-file-one-at-a-time) ([page](http://localhost:3000/concepts/c)) | No table. A rail leads, one alert is open as a case file. | novel |
+| [C v2. Case file with lanes](#c-v2-case-file-with-lanes) ([page](http://localhost:3000/concepts/c-v2)) | A revision of C. A lane switch, a list and one case file. The decision block comes last. | novel |
 
 ## A. Ranked queue
 
@@ -76,7 +78,26 @@ Design questions are section 8 of [`docs/REQUIREMENTS.md`](../docs/REQUIREMENTS.
 **Trade-off:** good: focus, payload next to the reasoning. Costs: no overview of the queue, fixed order.
 **Assumes about the analyst:** works the queue in order and trusts the ranking.
 
+## C v2. Case file with lanes
+
+**Idea:** a revision of C. A lane switch ("Quick confirm" / "Needs review") and a list on the left, one case file on the right. The decision block comes last.
+
+| Question | Answer |
+|---|---|
+| 1. Quick confirm or investigate | The switch. Quick confirm: 2 clicks (select, Confirm). Needs review: 3 clicks (select, tick the statement "I reviewed the evidence", Confirm). The tick is a statement, not proof of a review. |
+| 2. Sorting | The switch picks the lane. Inside a lane: severity, then oldest. |
+| 3. After confirm or reject | The card stays in its lane, greyed, with the new status. The decision block shows the same status. No Undo and no next step after Reject. |
+| 4. Fields | Card and detail share one order: status, severity, time, id: title. The detail continues with source, summary, evidence, action and raw fields. |
+
+**What changed from C:** a lane switch replaces the single ranked rail. The detail is one column and the decision block is at the end, with the review status, the tick (Needs review only) and Confirm / Reject together. After an action the card stays in the list instead of moving to the next alert.
+**Trade-off:** good: effort is split by lane, the detail reads top-down and the decision comes after the evidence. Costs: the tick can be set without reading, and the other lane is hidden until the switch is used.
+**Assumes about the analyst:** clears the Quick confirm lane first, then reads each Needs review detail top-down.
+**Not reviewed yet:** the owner reviews C v2 blind first. It is not checked against `core/review-criteria.md`.
+
 ## Open questions
+
+- **Will analysts tick "I reviewed the evidence" on autopilot?** Ask the SOC analyst. (C v2)
+- **Should Reject also need the tick?** Assumed no, the tick gates only Confirm. Ask the SOC analyst. (C v2, assumption)
 
 Fields the screens need and the repo does not have. They are listed, not filled.
 
@@ -93,10 +114,10 @@ Fields the screens need and the repo does not have. They are listed, not filled.
 ## Files
 
 - `app/concepts/page.tsx`: index page (questions, comparison table, links, missing fields).
-- `app/concepts/a/page.tsx`, `b/page.tsx`, `c/page.tsx`: one route per concept. All three render `concept-page.tsx`.
+- `app/concepts/a/page.tsx`, `b/page.tsx`, `c/page.tsx`, `c-v2/page.tsx`: one route per concept. All three render `concept-page.tsx`.
 - `app/concepts/concept-page.tsx`: question-and-answer header, idea, card and screens of one concept.
 - `app/concepts/concepts-content.ts`: design questions, concept answers, missing fields.
-- `app/concepts/concept-a.tsx`, `concept-b.tsx`, `concept-c.tsx`: one file per concept.
+- `app/concepts/concept-a.tsx`, `concept-b.tsx`, `concept-c.tsx`, `concept-c2.tsx`: one file per concept.
 - `app/concepts/concepts-frame.tsx`: shared frame, blocks and thumbnails.
 - `app/concepts/concepts-data.ts`: loads the eval set and recorded answers, ranks the list.
 - `app/concepts/concepts.css`: plain CSS, prefixed `concepts-`.
