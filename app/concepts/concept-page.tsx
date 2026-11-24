@@ -3,13 +3,14 @@ import { ConceptA } from "./concept-a";
 import { ConceptB } from "./concept-b";
 import { ConceptC } from "./concept-c";
 import { ConceptC2 } from "./concept-c2";
+import { ConceptC21 } from "./concept-c21";
 import { CONCEPTS, QUESTIONS } from "./concepts-content";
 import "./concepts.css";
 
-const SCREENS = { A: ConceptA, B: ConceptB, C: ConceptC, C2: ConceptC2 };
+const SCREENS = { A: ConceptA, B: ConceptB, C: ConceptC, C2: ConceptC2, C21: ConceptC21 };
 
 // One concept on its own page, so it can be linked alone. The screens are unchanged.
-export function ConceptPage({ id }: { id: "A" | "B" | "C" | "C2" }) {
+export function ConceptPage({ id }: { id: "A" | "B" | "C" | "C2" | "C21" }) {
   const c = CONCEPTS.find((x) => x.id === id)!;
   const Screens = SCREENS[id];
   return (

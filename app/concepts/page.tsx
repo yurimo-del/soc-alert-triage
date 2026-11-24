@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "Step 2. Index of greyscale wireframe concepts for the alert list and alert detail.",
 };
 
-// Index page: the questions, the comparison and a link to each concept. Screens live on /concepts/a, /b, /c and /c-v2.
+// Index page: the questions, the comparison and a link to each concept. Screens live on /concepts/a, /b, /c, /c-v2 and /c-v2-1.
 export default function ConceptsIndexPage() {
   return (
     <main className="concepts-page">

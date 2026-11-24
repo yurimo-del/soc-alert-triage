@@ -168,3 +168,11 @@
 .concepts-item { border: 1px solid #aaa; padding: 0.2em 0.4em; margin-bottom: 0.3em; background: #fff; min-width: 0; }
 .concepts-decision { border-width: 2px; }
 .concepts-tick { margin: 0.2em 0; }
+
+/* Concept C v2.1: own classes, so C v2 above stays exactly as it was. */
+.concepts-c21-list { min-width: 0; }
+.concepts-c21-list .concepts-block { margin-bottom: 0.3em; }
+.concepts-c21-item { display: flex; align-items: center; gap: 0.4em; border: 1px solid #aaa; padding: 0.2em 0.4em; margin-bottom: 0.3em; background: #fff; min-width: 0; }
+.concepts-c21-text { flex: 1; min-width: 0; }
+.concepts-c21-mark { font-weight: bold; font-size: 1.3em; line-height: 1; }
+.concepts-c21-link { text-decoration: underline; text-underline-offset: 3px; font-weight: bold; }

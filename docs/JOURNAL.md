@@ -199,6 +199,8 @@ My corrections to the concepts:
 **AI note:** The agent described opening a panel as a review. It was not. The AI describes the flow it wants, not the flow it drew. Count the clicks. Also, the skill's self-check passed all its rules and found none of my corrections. It checks how the screen is drawn, not if the logic is right.
 
 ## Day 6: Framework and project split
+* **Date:** Day 6 of 21-day Sprint (November 22, 2026)
+* **Focus:** Splitting the repo into a reusable framework and the project, so the same process can work on the next product.
 
 **What:** I split the repo into a reusable framework (`.claude/` and `framework/`) and the project (`core/`, `data/`, `concepts/`, `app/`, `docs/`, `memory/`). The framework has the workflow, quality gates, templates, a skills registry and a changelog. `core/` holds the project frame, with every gap marked `[MISSING]`.
 
@@ -217,6 +219,8 @@ My corrections today:
 **AI note:** Before the merge I asked the agent for a read-only audit. It found the design-system name inside the skill, a review criteria path that did not match, and a gate that said 2 directions while the skill made 3. I decided each one. The fixes are in framework/CHANGELOG.md.
 
 ## Day 7: The input changes from a new idea to an existing product
+* **Date:** Day 7 of 21-day Sprint (November 23, 2026)
+* **Focus:** Changing the input from a new idea to an existing product, and choosing my review criteria.
 
 **What:** I changed what the framework starts from and what it ends with. It now starts by reading an existing product layer by layer (step 0) and ends with a UX rules skill (step 7) instead of a handover package. Recorded as ADR-10.
 
@@ -227,3 +231,36 @@ My corrections today:
 **Lesson:** Speed with AI is not the story. The story is the quality of decisions, and whether others can build in one UX without me.
 
 **AI note:** I asked the agent to list every place that still described the old step 7, not to fix them. The list showed that the change touched gates, the skills registry, the README and older ADRs. A rename in one file is never only one file.
+
+## Day 8: Concept C v2 and my first blind review
+* **Date:** Day 8 of 21-day Sprint (November 24, 2026)
+* **Focus:** Building concept C v2 and testing my review criteria on it in a blind review.
+
+**What:** The wireframe skill built concept C v2. It has a list with two lanes, Quick confirm and Needs review, and a detail panel for alert-006, alert-003 and alert-011, with the states after Confirm and Reject. The skill got the rules from my day 5 corrections. I reviewed C v2 blind with my review criteria. My corrections are in C v2.1, which replaces C v2 on the same page. The wireframe skill is now 0.4. Key prompts are saved in docs/prompts/.
+
+- [All concepts](/concepts)
+- [Concept C v2: case file with lanes, as reviewed](/concepts/c-v2)
+- [Concept C v2.1: after my review](/concepts/c-v2-1)
+
+**Why:** Direction C was picked on day 5. Now the expert check only tests C v2, it does not pick a direction. Before an expert sees it, I want my own review, and later the review skill's review of the same version, so I can compare them.
+
+**How:** I reviewed the agent's plan before it built anything, then reviewed C v2 without reading the agent's summary. The agent did not review its own work.
+
+My corrections to the plan:
+- My rule "action next to its status" did not say where. The agent moved the buttons to the top. I made the rule clear: the action and its status form one block, after what the user must read.
+
+My corrections to C v2:
+- The list showed the lane name on every row. The tab already says it. I asked to remove it.
+- The list is sorted by criticality, so criticality goes first, in the list and in the detail.
+- Confirm and Reject decide the recommended action, so they sit inside its panel.
+- A done item was greyed out. I asked for a clear icon instead: a check mark or an X.
+- I could not filter or sort a lane. I asked for a quick filter (not reviewed, confirmed, rejected) and a sort by criticality or time.
+- Quick confirm showed all the details at once. I asked for an overview first. What goes in it is a question for the analyst.
+- After Confirm or Reject, the panel lost the tick and the decision. Only a mark on the row was left. I asked to keep the record in the panel: the action, the tick and the result. Only the buttons go.
+- View more details" was only on one screen, so the idea was not clear. I asked for the same structure on every screen and one example with the details open.
+
+Questions for the SOC analyst: what belongs in the Quick confirm overview, is a "needs review" label in the list useful, and is Undo needed after Confirm or Reject.
+
+**Lesson:** A rule that does not say where is read in two ways. My rule "action next to its status" was right, but I had to fix it twice. The second time was in my own review, not in the agent's plan. I only saw the real place when I looked at the screen: the buttons belong to the thing they decide.
+
+**AI note:** The agent followed my rule word for word and moved the buttons to the top. It did what I wrote, not what I meant. It also flagged the conflict between the new rule and the old skill rule by itself, before building.

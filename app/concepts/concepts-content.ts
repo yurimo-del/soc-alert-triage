@@ -71,6 +71,22 @@ export const CONCEPTS = [
     tradeoff: "Good: effort is split by lane, the detail reads top-down and the decision comes after the evidence. Costs: the tick can be set without reading, and the other lane is hidden until the switch is used.",
     assumes: "Clears the Quick confirm lane first, then reads each Needs review detail top-down.",
   },
+  {
+    id: "C21",
+    label: "C v2.1",
+    slug: "c-v2-1",
+    name: "Case file with lanes",
+    kind: "novel",
+    idea: "A revision of C v2. Lane switch, filter and sort with a list on the left, one case file on the right. Every detail has an overview, a details link and a decision panel that holds the recommended action and the buttons.",
+    answers: [
+      "The switch. Every detail has the same structure: overview, then \"View more details\", then the decision panel. Quick confirm: details collapsed. 2 clicks: select, Confirm. Needs review: details open, so the evidence is in view before the tick. 3 clicks: select, tick \"I reviewed the evidence\", Confirm. The tick is a statement, not proof of a review.",
+      "The switch picks the lane. A filter (All, Not reviewed, Confirmed, Rejected) and a sort (severity, time) sit under it. Default: severity, then oldest.",
+      "The row stays in its lane, not greyed, and gets a mark: a check for confirmed, an X for rejected. The detail shows the new status at the top. The panel keeps the record: the recommended action, the tick as it was set (read-only) and the result in place of the buttons. No Undo and no next step after Reject.",
+      "Row: severity, time, id: title, and the result mark at the right edge. Detail: severity, status, time, id: title, then overview, details and the decision panel.",
+    ],
+    tradeoff: "Good: effort is split by lane, the row says only what the lane does not, and the buttons sit with the action they decide. Costs: the tick can be set without reading, and Quick confirm hides the evidence under \"View more details\".",
+    assumes: "Clears the Quick confirm lane first from the overview, then reads each Needs review detail top-down.",
+  },
 ] as const;
 
 // Fields the screens need and the repo does not have. Listed, not filled.

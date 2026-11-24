@@ -3,7 +3,7 @@
 | Skill | Workflow step | Type | Inspired by | Version | Status |
 |---|---|---|---|---|---|
 | requirements-review | 1 | own | - | - | planned |
-| wireframe | 3 | own | none | 0.3 | active |
+| wireframe | 3 | own | none | 0.4 | active |
 | review | 4A | own | - | - | planned |
 | critique | 4 | - | - | - | dropped (ADR-08) |
 | handover | 7 | own | - | - | planned |
