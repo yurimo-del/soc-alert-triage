@@ -258,6 +258,7 @@ My corrections to C v2:
 - Quick confirm showed all the details at once. I asked for an overview first. What goes in it is a question for the analyst.
 - After Confirm or Reject, the panel lost the tick and the decision. Only a mark on the row was left. I asked to keep the record in the panel: the action, the tick and the result. Only the buttons go.
 - View more details" was only on one screen, so the idea was not clear. I asked for the same structure on every screen and one example with the details open.
+- The agent replaced C v2 with C v2.1 and the history was gone. I asked to keep every version on its own page.
 
 Questions for the SOC analyst: what belongs in the Quick confirm overview, is a "needs review" label in the list useful, and is Undo needed after Confirm or Reject.
 
