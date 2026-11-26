@@ -265,3 +265,17 @@ Questions for the SOC analyst: what belongs in the Quick confirm overview, is a 
 **Lesson:** A rule that does not say where is read in two ways. My rule "action next to its status" was right, but I had to fix it twice. The second time was in my own review, not in the agent's plan. I only saw the real place when I looked at the screen: the buttons belong to the thing they decide.
 
 **AI note:** The agent followed my rule word for word and moved the buttons to the top. It did what I wrote, not what I meant. It also flagged the conflict between the new rule and the old skill rule by itself, before building.
+
+## Day 9 (Thu 26 Nov)
+* **Date:** 26 November 2026
+* **Focus:** First expert test of concept C v2.1, and turning the findings into decisions.
+
+**What:** I showed concept [C v2.1](/concepts/c-v2-1) to a security expert in a 20 minute call. The screens were static images, and he described what he would do on each one. He gave ten findings. I put them in a table, each with three possible solutions, and chose 8 to take and 2 to drop.
+
+**Why:** The review skill needs a real expert to compare against. His findings are the first reference for calibrating it. This is one person, so the findings are a signal, not validation.
+
+**How:** I recorded the call and the AI summarized the transcript. I asked for the problems and several possible solutions for each, then reviewed them myself. The AI also mapped each finding to my review criteria, and I still need to check this mapping. By that mapping, four findings were not covered by any criterion: labels and names, links between alerts, the state of the queue after a decision, and how the list and the detail work together. I also decided to replace the two tabs with one row of segments (All, Ready to confirm, Needs review, Done), as an idea to test.
+
+**Lesson:** Review criteria that I wrote before meeting an expert missed whole areas of what he cared about. Calibrating the skill only on my own judgment would have kept those gaps. The expert findings show where the criteria must grow, and they stay a draft until a second session confirms them.
+
+**AI note:** The advisor said the review skill v0.1 was ready to run. It was not in the repo. I found it when I asked where my criteria were, and I also found the criteria file in the wrong folder. Rule: before a step that uses a skill, check that the skill is in the repo.

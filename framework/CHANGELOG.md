@@ -22,3 +22,7 @@
 
 ## v0.5 (2026-11-24)
 - Wireframe skill 0.4: action buttons sit inside the panel of the thing they decide (replaces the action-and-status block rule). New rules: a done item shows its result with an icon and is not greyed out, no repeated tab or filter text in rows, overview first in a fast lane. One exception to greyscale: a result mark may be a text glyph. Detail field order: shared fields keep their relative order, detail-only fields may sit between them. After an action the panel keeps the record (what was decided and what the user stated), only the buttons go. A revision never replaces the earlier version: each version keeps its own page and the index lists them all. Overview and details use the same structure on every screen, with one extra frame showing the details open (the frame limit allows it). The fast-lane rule is folded into this one.
+
+## v0.6 (2026-11-26)
+- Fix: swapped `core/review-criteria.md` and `templates/review-criteria.md` back. The filled criteria were in the template and the empty template was in core.
+- Review criteria template rewritten to match the filled format: status field, labels, used-in line, criterion cards (Why chosen, Use case, Question, Evidence, Source, Risk), a mandatory last criterion "What works today and should stay", Scale and Rules. The old table and review output format (pass / revise / reject) are removed.
